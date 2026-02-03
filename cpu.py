@@ -1,57 +1,33 @@
-def g_not(a):
-    return a^1
+nop = 0x0 
+loada = 0x1
+loadb = 0x2
+storea = 0x3
+storeb = 0x4
+add = 0x5
+jmp = 0x6
+halt = 0xf
 
-def g_and(a, b):
-    return a & b
+reg_a=0
+reg_b=0
+pc=0
+running=True
+memory=256*[0]
+print(memory)
 
-def g_or(a, b):
-    return a | b
+def fetch():
+    global pc
+    instruction=memory[pc]
+    pc=(pc+1)&0xff
+    return instruction
 
-def g_xor(a, b):
-    return a ^ b
+def execute(instruction):
+    global pc, reg_a, reg_b , running 
+    opcode=instruction>>4
+    operand=instruction&4
+    if opcode==nop:
+        pass
 
-def g_nor(a, b):
-    return (a | b)^1
 
-def g_nand(a, b):
-    return (a & b)^1
 
-def g_xnor(a, b):
-    return (a ^ b)^1
-
-while True:
-    usr = input(
-        "Enter two numbers and a logic gate in the format: a b gate\n"
-        "To quit type exit\n"
-    )
-
-    if usr == "exit":
-        break
-
-    x = usr.split()
-
-    a = int(x[0])
-    b = int(x[1])
-    gate = x[2]
-
-    if gate == "not":
-        print(g_not(a))
-
-    elif gate == "and":
-        print(g_and(a, b))
-
-    elif gate == "or":
-        print(g_or(a, b))
-
-    elif gate == "xor":
-        print(g_xor(a, b))
-
-    elif gate == "nor":
-        print(g_nor(a, b))
-
-    elif gate == "nand":
-        print(g_nand(a, b))
-
-    elif gate == "xnor":
-        print(g_xnor(a, b))
-
+while running==True:
+    break
