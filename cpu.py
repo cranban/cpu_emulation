@@ -22,12 +22,26 @@ def fetch():
 
 def execute(instruction):
     global pc, reg_a, reg_b , running 
+    print(f"instruction:{instruction}")
     opcode=instruction>>4
     operand=instruction&4
+    print(f"opcode:{opcode}")
+    print(f"operand:{operand}")
     if opcode==nop:
         pass
+    elif opcode==loada:
+        reg_a=operand
+    elif opcode==loadb:
+        reg_b=operand
+    elif opcode==storea:
+        print(opcode)
+    elif opcode==halt:
+        running=False
 
-
+memory[0]=(loada<<4)|0x4
+memory[1]=(storea<<4)|(reg_a>>4)
+memory[2]=(halt<<4)
 
 while running==True:
-    break
+    instruction=fetch()
+    execute(instruction)
