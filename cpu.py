@@ -24,7 +24,7 @@ def execute(instruction):
     global pc, reg_a, reg_b , running 
     print(f"instruction:{instruction}")
     opcode=instruction>>4
-    operand=instruction&4
+    operand=instruction & 0x0f
     print(f"opcode:{opcode}")
     print(f"operand:{operand}")
     if opcode==nop:
@@ -34,13 +34,22 @@ def execute(instruction):
     elif opcode==loadb:
         reg_b=operand
     elif opcode==storea:
-        print(opcode)
+        memory[operand]=reg_a
+    elif opcode==storeb:
+        memory[operand]=reg_b
+    elif opcode==add:
+        reg_a=reg_a+reg_b
+        print(f"sum:{reg_a}")
+    elif opcode==jmp:
+        pc=operand
     elif opcode==halt:
         running=False
 
 memory[0]=(loada<<4)|0x4
-memory[1]=(storea<<4)|(reg_a>>4)
-memory[2]=(halt<<4)
+memory[1]=(loadb<<4)|0x8
+memory[2]=(add<<4)|0x0
+memory[3]=(storea<<4)|0x9
+memory[4]=(halt<<4)|0x0
 
 while running==True:
     instruction=fetch()
