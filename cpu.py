@@ -1,29 +1,31 @@
 #instruction set
-nop = 0x0 
-loada = 0x1
-loadb = 0x2
-storea = 0x3
-storeb = 0x4
-addi = 0x5
-jmp = 0x6
-inp = 0x7
-out = 0x8
-mov = 0x9
-loadi = 0xa
-storei = 0xb
-shift = 0xc
-jz = 0xd
-sub = 0xe
-halt = 0xf
+nop = 0x00 
+loada = 0x01
+loadb = 0x02
+storea = 0x03
+storeb = 0x04
+addi = 0x05
+jmp = 0x06
+inp = 0x07
+out = 0x08
+mov = 0x09
+loadi = 0x0a
+storei = 0x0b
+shiftl = 0x0c
+shiftr = 0x0d
+jz = 0x0e
+sub = 0x0f
+halt = 0x10
 
 #registers
-reg_a = 0
-reg_b = 0
-inpr= 0 
-outr= 0
-indr = 0
-pc = 0
-zf = 0
+reg_a = 0           #id:0x0
+reg_b = 0           #id:0x1
+inpr = 0            #id:0x2
+outr = 0            #id:0x3
+indr = 0            #id:0x4
+pc = 0              
+zf = 0              
+nf = 0
 running = True
 memory = 256 * [0]
 
@@ -44,22 +46,49 @@ def execute(instruction):
         pass
     
     elif opcode == loada:
-        reg_a = operand
+        memory[indr]=reg_a
     
     elif opcode == loadb:
-        reg_b = operand
+        memory[indr]=reg_b
     
     elif opcode == storea:
-        memory[operand] = reg_a
+        reg_a = memory[indr]
     
     elif opcode == storeb:
-        memory[operand] = reg_b
+        reg_b = memory[indr]
     
     elif opcode == mov:
-        indr = operand
-    
+        origin=operand>>2
+        destination=operand&0xf
+        if origin==0x0 and destination==0x1:
+            reg_b=reg_a
+        elif origin==0x0 and destination==0x2:
+            inpr=reg_a
+        elif origin==0x0 and destination==0x3:
+            outr=reg_a
+        elif origin==0x0 and destination==0x4:
+            indr=reg_a
+        elif origin==0x1 and destination==0x0:
+            reg_a=reg_b
+        elif origin==0x1 and destination==0x2:
+            inpr=reg_b
+        elif origin==0x1 and destination==0x3:
+            outr=reg_b
+        elif origin==0x1 and destination==0x4:
+            indr=reg_b
+        elif origin==0x2 and destination==0x0:
+            reg_a=inpr
+
+                
     elif opcode == addi:
         reg_a = (reg_a + reg_b) & 0xff
+    
+    elif opcode = subi:
+        reg_a = (reg_a - reg_b)
+        if reg_a==0:
+            zf=1
+        elif reg_a<0:
+            nf=1
     
     elif opcode == jmp:
         pc = operand
@@ -77,8 +106,11 @@ def execute(instruction):
     elif opcode == storei:
         memory[indr] = reg_a
     
-    elif opcode == shift:
-        indr = (indr << 4) & 0xff
+    elif opcode == shiftr:
+        indr = (indr << operand) & 0xff
+    
+    elif opcode == shiftl:
+        indr = (indr>>operand) & 0xff
     
     elif opcode == jz and zf ==1:
         pc = indr
@@ -90,12 +122,7 @@ def execute(instruction):
         running=False
 
 #program
-memory[0]=(loada<<4)|0x4
-memory[1]=(loadb<<4)|0x8
-memory[2]=(add<<4)|0x0
-memory[3]=(storea<<4)|0xf
-memory[4]=(halt<<4)|0x0
-
+memory[0]=mov|((0x0<<2)|0x1)
 while running == True:
     instruction = fetch()
     execute(instruction)
