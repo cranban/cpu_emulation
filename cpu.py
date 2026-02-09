@@ -116,7 +116,7 @@ def execute(instruction):
         pc = indr
     
     elif opcode == sub:
-        reg a = (reg_a - reg_b) & 0xff
+        reg_a = (reg_a - reg_b) & 0xff
     
     elif opcode==halt:
         running=False
