@@ -1,4 +1,6 @@
+
 #instructions
+
 lda=0x00
 ldb=0x01
 ldc=0x02
@@ -31,20 +33,23 @@ call=0x1c
 ret=0x1d
 nop=0x1e
 halt=0x1f
+swp=0x20
 memory=[0]*65536
-#registers
-reg_a=0
-reg_b=0
-reg_c=0
-reg_out=0
-zero_flag=0
-negative_flag=0
-carry_flag=0
-program_counter=0
-stack_pointer=0
-reg_instruction=0
-reg_index=0
-running=True
+
+#registers           register id:
+
+reg_a=0              #0x1
+reg_b=0              #0x2
+reg_c=0              #0x3
+reg_out=0            #0x4
+zero_flag=0          #0x5
+negative_flag=0      #0x6
+carry_flag=0         #0x7
+program_counter=0    #0x8
+stack_pointer=0      #0x9
+reg_instruction=0    #0xa
+reg_index=0          #0xb
+running=True         #0xc
 
 def fetch(opcode,operand):
     global program_counter
@@ -61,14 +66,49 @@ def execute(opcode,operand):
     reg_index,running
     
     if opcode==lda:
-        reg_a=memory[reg_index]
+        reg_a=memory[operand]
     elif opcode==ldb:
-        reg_b=memory[reg_index]
+        reg_b=memory[operand]
     elif opcode==ldc:
-        reg_c=memory[reg_index]
+        reg_c=memory[operand]
     elif opcode==ldi:
         reg_a=operand
-
+    elif opcode==sta:
+        memory[operand]=reg_a
+    elif opcode==stb:
+        memory[operand]=reg_b
+    elif opcode==stc:
+        memory[operand]=reg_c
+    elif opcode==sti:
+        #placeholder
+        return
+    elif opcode==mov:
+        source=operand>>8
+        destination=operand&0xff
+        val=0
+        if source=0x1: val=reg_a
+        elif source=0x2: val=reg_b
+        elif source=0x3: val=reg_c
+        elif source=0x4: val=reg_out
+        elif source=0x5: val=zero_flag
+        elif source=0x6: val=negative_flag
+        elif source=0x7: val=carry_flag
+        elif source=0x8: val=program_counter
+        elif source=0x9: val=stack_pointer
+        elif source=0xa: val=reg_instruction
+        elif source=0xb: val=reg_index
+        
+        if destination=0x1: reg_a=val
+        elif destination=0x2: reg_b=val
+        elif destination=0x3: reg_c=val
+        elif destination=0x4: reg_out=val
+        elif destination=0x5: zero_flag=val
+        elif destination=0x6: reg_b=val
+        elif destination=0x7: reg_b=val
+        elif destination=0x8: reg_b=val
+        elif destination=0x9: reg_b=val
+        elif destination=0xa: reg_b=val
+        elif destination=0xb: reg_b=val
 while running==True:
     opcode,operand=fetch(opcode,operand)
     execute(opcode,operand)
