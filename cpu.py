@@ -1,5 +1,5 @@
+from fltk import*
 #instructions
-
 lda=0x00
 ldb=0x01
 ldc=0x02
@@ -33,8 +33,9 @@ ret=0x1d
 nop=0x1e
 halt=0x1f
 swp=0x20
+stiv=0x21
 memory=[0]*65536
-
+vram=4096*[0]
 #registers           register id:
 
 reg_a=0              #0x1
@@ -45,7 +46,7 @@ zero_flag=0          #0x5
 negative_flag=0      #0x6
 carry_flag=0         #0x7
 program_counter=0    #0x8
-stack_pointer=0      #0x9
+stack_pointer=0xffff #0x9
 reg_instruction=0    #0xa
 reg_index=0          #0xb
 running=True         #0xc
@@ -86,8 +87,7 @@ def execute(opcode,operand):
         memory[operand]=reg_c
     
     elif opcode==sti:
-        #placeholder
-        return
+        memory[reg_index&0xffff]=reg_a
     
     elif opcode==mov:
         source=operand>>8
@@ -148,15 +148,18 @@ def execute(opcode,operand):
         zero_flag=1 if reg_a==0 else 0
         negative_flag=1 if (reg_a&0x8000) else 0
         carry_flag=0
-        return
     
     elif opcode==shl:
-        #placeholder
-        return
+        reg_a=(reg_b<<reg_c)&0xffff
+        zero_flag=1 if reg_a==0 else 0
+        negative_flag=1 if (reg_a&0x8000) else 0
+        carry_flag= 1 if (reg_b<<reg_c)>0xffff else 0
     
     elif opcode==shr:
-        #placeholder
-        return
+        reg_a=(reg_b>>reg_c)&0xffff
+        zero_flag=1 if reg_a==0 else 0
+        negative_flag=1 if (reg_a&0x8000) else 0
+        carry_flag=reg_b&0x1 if reg_c>0 else 0 
     
     elif opcode==cmp:
         result=reg_b-reg_c
@@ -165,55 +168,100 @@ def execute(opcode,operand):
         negative_flag=1 if (result&0x8000) else 0
     
     elif opcode==inc:
-        #placeholder
-        return
+        reg_a=(reg_a+1)&0xffff
+        zero_flag=1 if reg_a==0 else 0
+        negative_flag=1 if (reg_a&0x8000) else 0
     
     elif opcode==dec:
-        #placeholder
-        return
+        reg_a=(reg_a-1)&0xffff
+        zero_flag=1 if reg_a==0 else 0
+        negative_flag=1 if (reg_a&0x8000) else 0
     
     elif opcode==jmp:
-        #placeholder
-        return
+        program_counter=operand
     
     elif opcode==jz:
-        #placeholder
-        return
+        if zero_flag==1:
+            program_counter=operand
     
     elif opcode==jnz:
-        #placeholder
-        return
-    
+        if zero_flag==0:
+            program_counter=operand
+        
     elif opcode==jn:
-        #placeholder
-        return
+        if negative_flag==1:
+            program_counter=operand
     
     elif opcode==jc:
-        #placeholder
-        return
+        if carry_flag==1:
+            program_counter=operand
     
     elif opcode==push:
-        #placeholder
-        return
+        stack_pointer=(stack_pointer-1)&0xffff
+        memory[stack_pointer]=reg_a
     
     elif opcode==pop:
-        #placeholder
-        return
+        reg_a=memory[stack_pointer]
+        stack_pointer=(stack_pointer+1)&0xffff
     
     elif opcode==call:
-        #placeholder
-        return
+        stack_pointer=(stack_pointer-1)&0xffff
+        memory[stack_pointer]=program_counter
+        program_counter=operand
     
     elif opcode==ret:
-        #placeholder
-        return
+        program_counter=memory[stack_pointer]
+        stack_pointer=(stack_pointer+1)&0xffff
+
+    elif opcode==swp:
+        reg_b,reg_c=reg_c,reg_b
     
     elif opcode==nop:
         return
     
     elif opcode==halt:
         running=False
-        
-while running==True:
-    opcode,operand=fetch()
-    execute(opcode,operand)
+
+def load_bin(filename):
+    with open(filename,"rb") as f:
+        data=f.read()
+        for i, byte in enumerate(data):
+            if i<65536:
+                memory[i]=byte
+
+def my_draw_callback(widget):
+    start_x = widget.x()
+    start_y = widget.y()
+    scale = 8
+    for i, val in enumerate(vram):
+        x = (i % 64) * scale
+        y = (i // 64) * scale
+        r = ((val >> 5) & 0x07) * 36
+        g = ((val >> 2) & 0x07) * 36
+        b = (val & 0x03) * 85
+        fl_color(fl_rgb_color(r, g, b))
+        fl_rectf(start_x + x, start_y + y, scale, scale)
+
+window = Fl_Window(512, 512, "64x64 Display")
+box = Fl_Box(0, 0, 512, 512)
+box.set_draw_cb(my_draw_callback)
+window.end()
+window.show()
+
+
+if __name__=="__main__":
+    load_bin("program.bin")
+    print("CPU START")
+    while running:
+        for _ in range(500):
+            current_pc=program_counter
+            opcode, operand=fetch()
+            execute(opcode,operand)
+            if not running: break
+        box.redraw()
+        Fl.check()
+
+        print(f"ADDR: {current_pc:04X} | OP: {opcode:02X} | OPR: {operand:04X}")
+        print(f"A: {reg_a:04X} | B: {reg_b:04X} | C: {reg_c:04X} | Flags: Z:{zero_flag} C:{carry_flag}")
+        print("-" * 40)
+Fl.run()
