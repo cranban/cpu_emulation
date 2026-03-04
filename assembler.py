@@ -6,7 +6,7 @@ def get_opcodes():
         'lda', 'ldb', 'ldc', 'ldi', 'sta', 'stb', 'stc', 'sti',
         'mov', 'add', 'sub', 'mul', 'div', 'gand', 'gor', 'gxor',
         'shl', 'shr', 'cmp', 'dec', 'inc', 'jmp', 'jz', 'jnz',
-        'jn', 'jc', 'push', 'pop', 'call', 'ret', 'nop', 'halt', 'swp'
+        'jn', 'jc', 'push', 'pop', 'call', 'ret', 'nop', 'halt', 'swp','stiv'
     ]
     mapping = {}
     for name in instructions:

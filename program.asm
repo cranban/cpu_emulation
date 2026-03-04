@@ -1,26 +1,60 @@
-ldi 0           ; Initialize color to 0
-mov 0x0104      ; Store color in reg_out (temporary storage)
-ldi 0           ; Initialize pixel index to 0
-mov 0x010B      ; Set reg_index = 0
-
-DRAW_LOOP:
-mov 0x0401      ; Copy reg_out (color) back to reg_a
-stiv 0          ; VRAM[reg_index] = reg_a
-
-; Increment Color
-inc 0           ; reg_a = reg_a + 1
-mov 0x0104      ; Save new color in reg_out
-
-; Increment Pixel Index
-mov 0x0B01      ; reg_a = reg_index
-inc 0           ; reg_a = reg_a + 1
-mov 0x010B      ; reg_index = reg_a
-
-; Check if we finished 4096 pixels (0x1000)
-ldb 0x1000      ; Load 4096 into reg_b
-mov 0x0B03      ; Load current index into reg_c
-cmp 0           ; Compare reg_b and reg_c
-jnz DRAW_LOOP   ; If index != 4096, repeat
-
-halt 0          ; Finish
-
+ldi 0
+mov 267
+loop:
+stiv 0
+stiv 3
+stiv 64
+stiv 67
+stiv 128
+stiv 129
+stiv 130
+stiv 131
+stiv 192
+stiv 195
+stiv 256
+stiv 259
+stiv 5
+stiv 6
+stiv 7
+stiv 8
+stiv 69
+stiv 133
+stiv 134
+stiv 135
+stiv 197
+stiv 261
+stiv 262
+stiv 263
+stiv 264
+stiv 266
+stiv 267
+stiv 268
+stiv 269
+stiv 202
+stiv 138
+stiv 74
+stiv 10
+stiv 15
+stiv 79
+stiv 143
+stiv 207
+stiv 271
+stiv 272
+stiv 273
+stiv 274
+stiv 276
+stiv 277
+stiv 278
+stiv 279
+stiv 212
+stiv 215
+stiv 84
+stiv 87
+stiv 20
+stiv 21
+stiv 22
+stiv 23
+stiv 151
+stiv 148
+inc 1
+jmp loop

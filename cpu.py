@@ -18,7 +18,7 @@ gor = 0x0e
 gxor = 0x0f
 shl = 0x10
 shr = 0x11
-cmp = 0x12
+cmpr = 0x12
 dec =0x13
 inc =0x14
 jmp = 0x15
@@ -161,7 +161,7 @@ def execute(opcode, operand):
         negative_flag = 1 if (reg_a & 0x8000) else 0
         carry_flag = reg_b & 0x1 if reg_c > 0 else 0 
     
-    elif opcode == cmp:
+    elif opcode == cmpr:
         result = reg_b - reg_c
         carry_flag = 1 if reg_b < reg_c else 0
         zero_flag = 1 if (result & 0xffff) == 0 else 0

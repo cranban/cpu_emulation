@@ -1,0 +1,55 @@
+Instructions:                    opcode:
+Data Movement:
+load(retrieves data from ram and copies it to a register):
+lda                              0x00
+ldb                              0x01
+ldc                              0x02
+ldi                              0x03
+store(copies data from a register to a specific memory address):
+sta                              0x04
+stb                              0x05
+stc                              0x06
+sti                              0x07
+mov(copies data from source operand to destination operand):
+mov                              0x08
+Logic instructions:
+add                              0x09
+sub                              0x0a
+and                              0x0b
+or                               0x0c
+xor                              0x0d
+shl                              0x0e
+shr                              0x0f
+cmp                              0x10
+inc                              0x11
+dec                              0x12
+Control flow:
+jmp                              0x13
+jz                               0x14
+jnz                              0x15
+jn                               0x16
+jc                               0x17
+push                             0x18
+pop                              0x19
+call                             0x1a
+ret                              0x1b
+System instructions:
+nop                              0x1c
+halt                             0x1d
+
+Memory size:
+65536 bytes
+
+Registers:
+A register
+B register
+C register
+out register
+zf register
+nf register
+cf register
+pc register
+sp register
+ir register
+ix register
+
