@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YBM-16 | The Complete ISA Manual</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --sidebar: #0a0a0a;
+            --accent: #00ff41;
+            --white: #ffffff;
+            --border: #222222;
+            --code-bg: #050505;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            color: var(--white);
+            background-color: var(--bg);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            width: 300px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+        }
+
+        nav h1 { font-size: 1.2rem; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; border-bottom: 1px solid var(--accent); padding-bottom: 10px; }
+        nav .cat { font-size: 0.7rem; text-transform: uppercase; color: var(--accent); margin: 1.5rem 0 0.5rem 0; display: block; font-weight: 900; letter-spacing: 1px; }
+        nav ul { list-style: none; padding: 0; margin: 0; }
+        nav a { text-decoration: none; color: var(--white); font-size: 0.8rem; display: block; padding: 4px 0; transition: 0.2s; }
+        nav a:hover { color: var(--accent); padding-left: 10px; }
+
+        /* Content */
+        main { flex: 1; padding: 4rem 5%; max-width: 1200px; }
+        section { margin-bottom: 6rem; }
+        h2 { font-size: 2.2rem; border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 2rem; text-transform: uppercase; }
+        h3 { color: var(--accent); font-size: 1.5rem; margin-top: 3rem; }
+        h4 { color: #aaffcc; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.5rem; }
+
+        .ins-card {
+            background: var(--sidebar);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .ins-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .ins-name { font-family: monospace; font-size: 1.3rem; color: var(--accent); font-weight: bold; }
+        .ins-hex { font-family: monospace; color: #444; font-size: 0.9rem; }
+
+        pre {
+            background: var(--code-bg);
+            padding: 1.2rem;
+            border: 1px solid #111;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            color: #ffffff;
+        }
+        .k { color: var(--accent); }
+        .r { color: #ff79c6; }
+        .n { color: #8be9fd; }
+        .l { color: #bd93f9; }
+        .c { color: #6272a4; }
+
+        .table-wrap { width: 100%; overflow-x: auto; margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; background: #050505; }
+        th { text-align: left; color: var(--accent); padding: 10px; border-bottom: 1px solid var(--accent); font-size: 0.8rem; }
+        td { padding: 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+
+        /* Tutorial-specific */
+        .info-box {
+            background: #001a0d;
+            border: 1px solid #00aa2a;
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        .warn-box {
+            background: #1a0e00;
+            border: 1px solid #aa5500;
+            border-left: 4px solid #ff8800;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        .warn-box strong, .info-box strong {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .warn-box strong { color: #ff8800; }
+        .info-box strong { color: var(--accent); }
+
+        .chapter-intro {
+            font-size: 1.05rem;
+            color: #cccccc;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+        }
+        .step-list li {
+            counter-increment: step;
+            padding: 0.8rem 0 0.8rem 3rem;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .step-list li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0.8rem;
+            width: 1.8rem;
+            height: 1.8rem;
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flags-table td:first-child { font-family: monospace; color: var(--accent); }
+        .reg-badge {
+            display: inline-block;
+            background: #001a0d;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            margin: 2px;
+        }
+        .encoding-box {
+            display: flex;
+            gap: 4px;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .enc-byte {
+            flex: 1;
+            background: #0d0d0d;
+            border: 1px solid #333;
+            padding: 6px;
+            text-align: center;
+        }
+        .enc-byte .label { font-size: 0.65rem; color: #666; display: block; margin-bottom: 2px; }
+        .enc-byte .val { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<nav>
+    <h1>YBM_16</h1>
+
+    <span class="cat">Tutorial</span>
+    <ul>
+        <li><a href="#tut-intro">Ch 1 — Introduction</a></li>
+        <li><a href="#tut-registers">Ch 2 — Registers</a></li>
+        <li><a href="#tut-memory">Ch 3 — Memory Model</a></li>
+        <li><a href="#tut-data">Ch 4 — Moving Data</a></li>
+        <li><a href="#tut-math">Ch 5 — Arithmetic</a></li>
+        <li><a href="#tut-logic">Ch 6 — Bitwise Logic</a></li>
+        <li><a href="#tut-flow">Ch 7 — Control Flow</a></li>
+        <li><a href="#tut-loops">Ch 8 — Loops</a></li>
+        <li><a href="#tut-stack">Ch 9 — Stack & Functions</a></li>
+        <li><a href="#tut-display">Ch 10 — Display</a></li>
+        <li><a href="#tut-projects">Ch 11 — Projects</a></li>
+    </ul>
+
+    <span class="cat">Memory & Data</span>
+    <ul>
+        <li><a href="#ld">ld - Load Direct</a></li>
+        <li><a href="#st">st - Store Direct</a></li>
+        <li><a href="#ldi">ldi - Load Immediate</a></li>
+        <li><a href="#ldind">ldind - Load Indirect</a></li>
+        <li><a href="#stind">stind - Store Indirect</a></li>
+        <li><a href="#mov">mov - Move Register</a></li>
+    </ul>
+
+    <span class="cat">Arithmetic & Logic</span>
+    <ul>
+        <li><a href="#add">add - Addition</a></li>
+        <li><a href="#sub">sub - Subtraction</a></li>
+        <li><a href="#mul">mul - Multiplication</a></li>
+        <li><a href="#div">div - Division</a></li>
+        <li><a href="#mod">mod - Modulo</a></li>
+        <li><a href="#inc">inc - Increment</a></li>
+        <li><a href="#dec">dec - Decrement</a></li>
+        <li><a href="#neg">neg - Negate</a></li>
+        <li><a href="#gand">gand - Bitwise AND</a></li>
+        <li><a href="#gor">gor - Bitwise OR</a></li>
+        <li><a href="#gxor">gxor - Bitwise XOR</a></li>
+        <li><a href="#gnot">gnot - Bitwise NOT</a></li>
+        <li><a href="#shl">shl - Shift Left</a></li>
+        <li><a href="#shr">shr - Shift Right</a></li>
+    </ul>
+
+    <span class="cat">Control Flow</span>
+    <ul>
+        <li><a href="#cmpr">cmpr - Compare</a></li>
+        <li><a href="#jmp">jmp - Jump</a></li>
+        <li><a href="#jz">jz - Jump if Zero</a></li>
+        <li><a href="#jnz">jnz - Jump if Not Zero</a></li>
+        <li><a href="#jn">jn - Jump if Negative</a></li>
+        <li><a href="#jc">jc - Jump if Carry</a></li>
+        <li><a href="#jge">jge - Jump Greater Equal</a></li>
+        <li><a href="#jle">jle - Jump Less Equal</a></li>
+    </ul>
+
+    <span class="cat">Stack & System</span>
+    <ul>
+        <li><a href="#push">push - Push Stack</a></li>
+        <li><a href="#pop">pop - Pop Stack</a></li>
+        <li><a href="#call">call - Function Call</a></li>
+        <li><a href="#ret">ret - Return</a></li>
+        <li><a href="#pixel">pixel - Draw</a></li>
+        <li><a href="#nop">nop - No Op</a></li>
+        <li><a href="#halt">halt - Stop</a></li>
+    </ul>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════ TUTORIAL ══ -->
+
+<section id="tutorial">
+<h2>Tutorial</h2>
+
+<!-- ── Chapter 1 ──────────────────────────────────────── -->
+<div id="tut-intro">
+<h3>Chapter 1 — Introduction</h3>
+<p class="chapter-intro">
+    Welcome to YBM-16 assembly. This tutorial will take you from zero knowledge to writing real programs:
+    graphics, loops, functions, and everything in between. Read every chapter in order. By the end, nothing in
+    this language will be a mystery.
+</p>
+
+<h4>What is assembly?</h4>
+<p>
+    Most programming languages like Python or C sit far above the hardware. When you write <code>x = 5 + 3</code>,
+    a compiler or interpreter translates that into dozens of tiny machine operations. Assembly is one level above
+    the raw binary — every line you write corresponds to exactly one instruction the CPU executes. There is no
+    magic translation layer. You are in direct control.
+</p>
+<p>
+    This directness is both assembly's power and its challenge. You can do anything, but you have to be explicit
+    about everything.
+</p>
+
+<h4>How YBM-16 works</h4>
+<p>
+    YBM-16 is a 16-bit CPU. "16-bit" means it works with numbers up to 65,535 (0xFFFF) natively.
+    It has:
+</p>
+<ul>
+    <li><b>17 registers</b> — small, ultra-fast storage slots inside the CPU itself</li>
+    <li><b>64KB of RAM</b> — the main working memory, addressed from 0x0000 to 0xFFFF</li>
+    <li><b>16KB of VRAM</b> — memory mapped to a 128×128 pixel display</li>
+    <li><b>35 instructions</b> — the complete vocabulary of things the CPU can do</li>
+</ul>
+<p>
+    Every instruction is exactly <b>4 bytes</b> wide. The first byte is always the opcode (which instruction),
+    and the remaining 3 bytes carry operands like register numbers or addresses.
+</p>
+
+<h4>Your first program</h4>
+<p>Let's start with the simplest possible program:</p>
+<pre>
+<span class="k">ldi</span>  <span class="r">r0</span>, <span class="n">42</span>     <span class="c">; put the number 42 into register r0</span>
+<span class="k">halt</span>            <span class="c">; stop</span></pre>
+<p>
+    This loads the number 42 into register r0, then stops. When the CPU halts you can inspect r0 in the debugger
+    and confirm it holds 42. That's the whole program. From here, everything builds on this foundation.
+</p>
+
+<div class="info-box">
+    <strong>Note</strong>
+    Lines starting with <code>;</code> or anything after a <code>;</code> on a line are comments.
+    The assembler ignores them completely. Use comments freely — your future self will thank you.
+</div>
+</div>
+
+<!-- ── Chapter 2 ──────────────────────────────────────── -->
+<div id="tut-registers">
+<h3>Chapter 2 — Registers</h3>
+<p class="chapter-intro">
+    Registers are the CPU's working hands. Before you can do anything else you need to understand them.
+</p>
+
+<h4>The register file</h4>
+<p>YBM-16 has 17 registers:</p>
+
+<div class="table-wrap">
+<table>
+    <tr><th>Name</th><th>ID</th><th>Purpose</th></tr>
+    <tr><td><span class="reg-badge">r0</span> – <span class="reg-badge">r14</span></td><td>0x00 – 0x0E</td><td>General purpose. Use for any data, counters, temporaries.</td></tr>
+    <tr><td><span class="reg-badge">idx</span></td><td>0x0F</td><td>Index register. Conventionally used as a pointer or loop counter, but works identically to r0–r14.</td></tr>
+    <tr><td><span class="reg-badge">sp</span></td><td>0x10</td><td>Stack pointer. Automatically managed by push/pop/call/ret. Avoid writing to it manually unless you know what you're doing.</td></tr>
+</table>
+</div>
+
+<h4>Registers are not memory</h4>
+<p>
+    Registers live inside the CPU chip itself. Reading or writing a register takes zero clock cycles of memory
+    access — it's instantaneous. RAM access is much slower. Whenever possible, keep your working data in
+    registers and only go to RAM when you must.
+</p>
+
+<h4>Registers hold 16-bit values</h4>
+<p>
+    Every register stores exactly one 16-bit unsigned integer: a number from 0 to 65535.
+    There are no "types" — a register doesn't know if it's holding a pixel color, a memory address, or a
+    plain number. That distinction lives entirely in how your program uses it.
+</p>
+
+<h4>r0 convention</h4>
+<p>
+    <code>r0</code> is not special to the hardware, but by convention many programs use it as a permanent zero
+    register. If you load zero into r0 at startup and never write to it again, you can use
+    <code>cmpr rx, r0</code> to test whether rx is zero, which is a very common pattern.
+</p>
+<pre>
+<span class="k">ldi</span> <span class="r">r0</span>, <span class="n">0</span>   <span class="c">; establish zero register</span>
+<span class="c">; ... now r0 = 0 throughout the program</span></pre>
+</div>
+
+<!-- ── Chapter 3 ──────────────────────────────────────── -->
+<div id="tut-memory">
+<h3>Chapter 3 — The Memory Model</h3>
+<p class="chapter-intro">
+    Understanding where data lives is essential before you can write programs that do anything interesting.
+</p>
+
+<h4>The address space</h4>
+<p>
+    YBM-16 has a flat 16-bit address space: addresses 0x0000 through 0xFFFF (65,536 locations, each holding
+    one 16-bit word). Think of it as a giant numbered array of slots:
+</p>
+<pre>
+Address:  0x0000  0x0001  0x0002  ...  0xFFFF
+Content:  [    ] [    ] [    ] ...  [    ]</pre>
+
+<h4>Layout</h4>
+<div class="table-wrap">
+<table>
+    <tr><th>Range</th><th>Region</th><th>Description</th></tr>
+    <tr><td>0x0000 – 0x3FFF</td><td>Program ROM</td><td>Your assembled code is loaded here. Usually read-only at runtime.</td></tr>
+    <tr><td>0x4000 – 0xBFFF</td><td>RAM</td><td>Free to use for variables, arrays, stack frames — anything you need.</td></tr>
+    <tr><td>0xC000 – 0xFFFF</td><td>VRAM</td><td>Writes here appear on the 128×128 display. Each address is one pixel.</td></tr>
+</table>
+</div>
+
+<h4>Variables in RAM</h4>
+<p>
+    YBM-16 has no variable declarations. If you want a variable, pick an address in RAM and use it
+    consistently. It's conventional to put your variables right after the program code, or at a known high
+    address:
+</p>
+<pre>
+<span class="c">; Program code at 0x0000...</span>
+<span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">100</span>
+<span class="k">st</span>   <span class="r">r1</span>, <span class="n">0x4000</span>    <span class="c">; 0x4000 is our "score" variable</span>
+
+<span class="c">; Later...</span>
+<span class="k">ld</span>   <span class="r">r2</span>, <span class="n">0x4000</span>    <span class="c">; read "score" back</span></pre>
+
+<h4>Labels as addresses</h4>
+<p>
+    Labels in the assembler resolve to byte addresses. You can use a label anywhere an address is expected,
+    which makes your code readable and relocatable:
+</p>
+<pre>
+<span class="c">; This label points to address 0x0010 (if it's the 5th instruction, 5*4=20=0x14)</span>
+<span class="l">loop_start:</span>
+    <span class="k">inc</span>  <span class="r">r1</span>
+    <span class="k">jmp</span>  <span class="l">loop_start</span></pre>
+</div>
+
+<!-- ── Chapter 4 ──────────────────────────────────────── -->
+<div id="tut-data">
+<h3>Chapter 4 — Moving Data</h3>
+<p class="chapter-intro">
+    Almost every program starts the same way: loading values into registers to work with. There are four ways
+    to get data into a register.
+</p>
+
+<h4>Method 1: Load an immediate (ldi)</h4>
+<p>
+    <code>ldi</code> puts a literal number directly into a register. "Immediate" means the value is baked into
+    the instruction itself — it doesn't come from anywhere in memory.
+</p>
+<pre>
+<span class="k">ldi</span> <span class="r">r1</span>, <span class="n">255</span>       <span class="c">; r1 = 255 (decimal)</span>
+<span class="k">ldi</span> <span class="r">r2</span>, <span class="n">0xFF</span>      <span class="c">; r2 = 255 (hex — same thing)</span>
+<span class="k">ldi</span> <span class="r">r3</span>, <span class="n">0b1010</span>   <span class="c">; r3 = 10 (binary)</span></pre>
+<p>Use <code>ldi</code> for: constants, initial values, setting up counters.</p>
+
+<h4>Method 2: Load from memory (ld)</h4>
+<p>
+    <code>ld</code> reads a 16-bit value from a fixed address in RAM into a register.
+    The address is hardcoded into the instruction.
+</p>
+<pre>
+<span class="k">ld</span> <span class="r">r1</span>, <span class="n">0x4000</span>    <span class="c">; r1 = RAM[0x4000]</span></pre>
+<p>Use <code>ld</code> when: you know at compile time which address to read.</p>
+
+<h4>Method 3: Load from a pointer (ldind)</h4>
+<p>
+    <code>ldind</code> (load indirect) treats the value in a register as a memory address, then loads from there.
+    This is pointer dereferencing — essential for arrays and dynamic data.
+</p>
+<pre>
+<span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">0x4000</span>  <span class="c">; idx holds an address</span>
+<span class="k">ldind</span> <span class="r">r1</span>, <span class="r">idx</span>     <span class="c">; r1 = RAM[idx] = RAM[0x4000]</span>
+<span class="k">inc</span>   <span class="r">idx</span>          <span class="c">; advance pointer</span>
+<span class="k">ldind</span> <span class="r">r2</span>, <span class="r">idx</span>     <span class="c">; r2 = RAM[0x4001]</span></pre>
+<p>Use <code>ldind</code> when: iterating over arrays, following pointers computed at runtime.</p>
+
+<h4>Method 4: Copy from another register (mov)</h4>
+<p>
+    <code>mov</code> copies one register's value into another. The source is unchanged.
+</p>
+<pre>
+<span class="k">ldi</span> <span class="r">r1</span>, <span class="n">42</span>
+<span class="k">mov</span> <span class="r">r2</span>, <span class="r">r1</span>    <span class="c">; r2 = 42, r1 still = 42</span></pre>
+
+<h4>Storing back to memory</h4>
+<p>
+    <code>st</code> and <code>stind</code> are the mirror operations. After computing a result in a register,
+    store it to RAM to persist it:
+</p>
+<pre>
+<span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">999</span>
+<span class="k">st</span>   <span class="r">r1</span>, <span class="n">0x4000</span>   <span class="c">; RAM[0x4000] = 999</span>
+
+<span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">0x4010</span>
+<span class="k">stind</span> <span class="r">r1</span>, <span class="r">idx</span>     <span class="c">; RAM[idx] = r1</span></pre>
+
+<div class="warn-box">
+    <strong>Common mistake</strong>
+    Writing <code>ld r1, r2</code> won't work — <code>ld</code> takes a literal address, not a register.
+    If your address is in a register, you need <code>ldind</code>.
+</div>
+</div>
+
+<!-- ── Chapter 5 ──────────────────────────────────────── -->
+<div id="tut-math">
+<h3>Chapter 5 — Arithmetic</h3>
+<p class="chapter-intro">
+    YBM-16 supports the five fundamental arithmetic operations. All of them work exclusively on registers —
+    you cannot do math directly on memory values.
+</p>
+
+<h4>The three-register pattern</h4>
+<p>
+    All binary arithmetic follows the same form: <code>op dst, s1, s2</code>.
+    The result goes into <code>dst</code>, and the two source registers are unchanged (unless dst is the same
+    as one of them).
+</p>
+<pre>
+<span class="k">ldi</span> <span class="r">r1</span>, <span class="n">10</span>
+<span class="k">ldi</span> <span class="r">r2</span>, <span class="n">3</span>
+<span class="k">add</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r3 = 13</span>
+<span class="k">sub</span> <span class="r">r4</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r4 = 7</span>
+<span class="k">mul</span> <span class="r">r5</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r5 = 30</span>
+<span class="k">div</span> <span class="r">r6</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r6 = 3  (integer division)</span>
+<span class="k">mod</span> <span class="r">r7</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r7 = 1  (remainder)</span></pre>
+
+<h4>In-place operations</h4>
+<p>
+    You can use the destination as a source too, which is very common for accumulators:
+</p>
+<pre>
+<span class="k">ldi</span> <span class="r">r1</span>, <span class="n">5</span>
+<span class="k">add</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r1 = r1 + r2 (r1 updates in place)</span></pre>
+
+<h4>inc and dec</h4>
+<p>
+    Incrementing and decrementing by 1 is so common it gets its own instructions. They're shorter to write
+    and slightly faster than <code>add r1, r1, one_reg</code>:
+</p>
+<pre>
+<span class="k">ldi</span> <span class="r">r1</span>, <span class="n">0</span>
+<span class="k">inc</span> <span class="r">r1</span>    <span class="c">; r1 = 1</span>
+<span class="k">inc</span> <span class="r">r1</span>    <span class="c">; r1 = 2</span>
+<span class="k">dec</span> <span class="r">r1</span>    <span class="c">; r1 = 1</span></pre>
+
+<h4>Negation</h4>
+<p>
+    <code>neg</code> flips the sign using two's complement. Since YBM-16 is 16-bit, values wrap:
+    <code>neg 1 = 65535 = 0xFFFF</code>, which in signed arithmetic is -1.
+</p>
+<pre>
+<span class="k">ldi</span> <span class="r">r1</span>, <span class="n">5</span>
+<span class="k">neg</span> <span class="r">r1</span>    <span class="c">; r1 = 0xFFFB (-5 in signed 16-bit)</span></pre>
+
+<div class="info-box">
+    <strong>Tip — computing with constants</strong>
+    The CPU has no "add immediate" instruction. To add a constant, load it into a spare register first:
+    <pre style="margin:0.5rem 0 0 0"><span class="k">ldi</span> <span class="r">r14</span>, <span class="n">10</span>
+<span class="k">add</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r14</span></pre>
+    Many programs dedicate a register (like r14) to frequently used small constants.
+</div>
+</div>
+
+<!-- ── Chapter 6 ──────────────────────────────────────── -->
+<div id="tut-logic">
+<h3>Chapter 6 — Bitwise Logic</h3>
+<p class="chapter-intro">
+    Bitwise operations treat a 16-bit value as 16 individual bits and act on each independently.
+    They're essential for flags, masks, packing/unpacking color channels, and many other low-level tasks.
+</p>
+
+<h4>AND — masking</h4>
+<p>
+    AND sets a bit to 1 only if both corresponding bits are 1. Its main use is extracting specific bits
+    by applying a "mask":
+</p>
+<pre>
+<span class="c">; Extract the lower 4 bits (nibble) of r1</span>
+<span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">0x000F</span>
+<span class="k">gand</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r3 = lower nibble only</span></pre>
+
+<h4>OR — setting bits</h4>
+<p>OR sets a bit if either input has it set. Use it to force specific bits on:</p>
+<pre>
+<span class="c">; Set bit 3 of r1 without touching anything else</span>
+<span class="k">ldi</span> <span class="r">r2</span>, <span class="n">0x0008</span>
+<span class="k">gor</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r2</span></pre>
+
+<h4>XOR — toggling / clearing</h4>
+<p>XOR flips bits. XORing a value with itself always produces zero — a fast way to zero a register:</p>
+<pre>
+<span class="k">gxor</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r1</span>   <span class="c">; r1 = 0, regardless of previous value</span>
+
+<span class="c">; Toggle a flag in r2</span>
+<span class="k">ldi</span>  <span class="r">r3</span>, <span class="n">0x0001</span>
+<span class="k">gxor</span> <span class="r">r2</span>, <span class="r">r2</span>, <span class="r">r3</span>   <span class="c">; flip bit 0</span></pre>
+
+<h4>NOT — invert all bits</h4>
+<pre>
+<span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">0xFF00</span>
+<span class="k">gnot</span> <span class="r">r1</span>           <span class="c">; r1 = 0x00FF</span></pre>
+
+<h4>Shifts — multiply/divide by powers of 2</h4>
+<p>
+    Shifting left by N is the same as multiplying by 2^N. Shifting right divides. This is faster than
+    <code>mul</code> or <code>div</code> for powers of two:
+</p>
+<pre>
+<span class="k">ldi</span> <span class="r">r1</span>, <span class="n">1</span>
+<span class="k">ldi</span> <span class="r">r2</span>, <span class="n">4</span>
+<span class="k">shl</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r3 = 1 << 4 = 16</span>
+<span class="k">shr</span> <span class="r">r4</span>, <span class="r">r3</span>, <span class="r">r2</span>   <span class="c">; r4 = 16 >> 4 = 1</span></pre>
+
+<h4>Practical: Packing two bytes into one word</h4>
+<p>Since YBM-16 works with 16-bit words, you often pack two 8-bit values together:</p>
+<pre>
+<span class="c">; Pack r1 (high byte) and r2 (low byte) into r3</span>
+<span class="k">ldi</span>  <span class="r">r4</span>, <span class="n">8</span>
+<span class="k">shl</span>  <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r4</span>   <span class="c">; shift r1 up 8 bits</span>
+<span class="k">gor</span>  <span class="r">r3</span>, <span class="r">r3</span>, <span class="r">r2</span>   <span class="c">; combine with r2</span>
+
+<span class="c">; Unpack: extract low byte</span>
+<span class="k">ldi</span>  <span class="r">r5</span>, <span class="n">0x00FF</span>
+<span class="k">gand</span> <span class="r">r6</span>, <span class="r">r3</span>, <span class="r">r5</span>   <span class="c">; r6 = low byte</span></pre>
+</div>
+
+<!-- ── Chapter 7 ──────────────────────────────────────── -->
+<div id="tut-flow">
+<h3>Chapter 7 — Control Flow</h3>
+<p class="chapter-intro">
+    Without branching, every program just falls through from top to bottom once.
+    Jumps and comparisons let you make decisions, creating the logic that makes programs useful.
+</p>
+
+<h4>How flags work</h4>
+<p>
+    The CPU has three internal status flags. You cannot read them directly into a register, but they are set
+    automatically by <code>cmpr</code> and tested by conditional jumps:
+</p>
+
+<div class="table-wrap">
+<table class="flags-table">
+    <tr><th>Flag</th><th>When it's set</th></tr>
+    <tr><td>Z (zero)</td><td>The result of the last cmpr was equal (difference = 0)</td></tr>
+    <tr><td>N (negative)</td><td>The result was negative (s1 &lt; s2 in signed arithmetic)</td></tr>
+    <tr><td>C (carry)</td><td>The subtraction produced an unsigned borrow</td></tr>
+</table>
+</div>
+
+<h4>cmpr sets, jumps read</h4>
+<p>
+    Always call <code>cmpr</code> immediately before a conditional jump. The flags persist until the next
+    <code>cmpr</code> or arithmetic operation overwrites them.
+</p>
+<pre>
+<span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; compare r1 to r2, set flags</span>
+<span class="k">jz</span>   <span class="l">equal</span>   <span class="c">; jump if r1 == r2</span>
+<span class="k">jn</span>   <span class="l">less</span>    <span class="c">; jump if r1 &lt; r2</span>
+<span class="k">jge</span>  <span class="l">big</span>     <span class="c">; jump if r1 >= r2</span></pre>
+
+<h4>Conditional jump reference</h4>
+<div class="table-wrap">
+<table>
+    <tr><th>Instruction</th><th>Jumps when...</th><th>Equivalent to</th></tr>
+    <tr><td><code>jz</code></td><td>Z flag set</td><td>s1 == s2</td></tr>
+    <tr><td><code>jnz</code></td><td>Z flag clear</td><td>s1 != s2</td></tr>
+    <tr><td><code>jn</code></td><td>N flag set</td><td>s1 &lt; s2 (signed)</td></tr>
+    <tr><td><code>jc</code></td><td>C flag set</td><td>s1 &lt; s2 (unsigned borrow)</td></tr>
+    <tr><td><code>jge</code></td><td>N flag clear</td><td>s1 >= s2</td></tr>
+    <tr><td><code>jle</code></td><td>N or Z flag set</td><td>s1 &lt;= s2</td></tr>
+</table>
+</div>
+
+<h4>if / else in assembly</h4>
+<p>
+    High-level <code>if/else</code> translates directly. Compare, branch to the else body if the condition
+    is false, fall through if it's true:
+</p>
+<pre>
+<span class="c">; if r1 == r2: store 1, else: store 0</span>
+    <span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>
+    <span class="k">jnz</span>  <span class="l">else_branch</span>
+<span class="c">; --- then branch ---</span>
+    <span class="k">ldi</span>  <span class="r">r3</span>, <span class="n">1</span>
+    <span class="k">st</span>   <span class="r">r3</span>, <span class="n">0x4000</span>
+    <span class="k">jmp</span>  <span class="l">end_if</span>
+<span class="l">else_branch:</span>
+    <span class="k">ldi</span>  <span class="r">r3</span>, <span class="n">0</span>
+    <span class="k">st</span>   <span class="r">r3</span>, <span class="n">0x4000</span>
+<span class="l">end_if:</span>
+    <span class="c">; continues here</span></pre>
+</div>
+
+<!-- ── Chapter 8 ──────────────────────────────────────── -->
+<div id="tut-loops">
+<h3>Chapter 8 — Loops</h3>
+<p class="chapter-intro">
+    Loops are among the most powerful constructs in any language. In assembly they're just
+    a compare and a conditional jump back to an earlier address.
+</p>
+
+<h4>Count-down loop</h4>
+<p>
+    The simplest pattern: decrement a counter each iteration, loop while it's not zero.
+</p>
+<pre>
+<span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">10</span>       <span class="c">; loop 10 times</span>
+<span class="k">ldi</span>  <span class="r">r0</span>, <span class="n">0</span>        <span class="c">; zero register</span>
+<span class="l">loop:</span>
+    <span class="k">dec</span>  <span class="r">r1</span>
+    <span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r0</span>    <span class="c">; is r1 == 0?</span>
+    <span class="k">jnz</span>  <span class="l">loop</span>      <span class="c">; if not, go again</span></pre>
+
+<h4>Count-up loop with limit</h4>
+<pre>
+<span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">0</span>
+<span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">100</span>      <span class="c">; limit</span>
+<span class="l">loop:</span>
+    <span class="c">; --- body here ---</span>
+    <span class="k">inc</span>  <span class="r">r1</span>
+    <span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>
+    <span class="k">jnz</span>  <span class="l">loop</span></pre>
+
+<h4>Iterating over an array</h4>
+<p>
+    Use <code>idx</code> as a pointer. Advance it each iteration to walk through memory:
+</p>
+<pre>
+<span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">0x4000</span>  <span class="c">; start of array</span>
+<span class="k">ldi</span>   <span class="r">r2</span>, <span class="n">0x4010</span>  <span class="c">; end address (16 elements)</span>
+<span class="k">ldi</span>   <span class="r">r3</span>, <span class="n">0</span>       <span class="c">; sum accumulator</span>
+<span class="l">sum_loop:</span>
+    <span class="k">ldind</span> <span class="r">r1</span>, <span class="r">idx</span>    <span class="c">; load current element</span>
+    <span class="k">add</span>   <span class="r">r3</span>, <span class="r">r3</span>, <span class="r">r1</span><span class="c">; add to sum</span>
+    <span class="k">inc</span>   <span class="r">idx</span>
+    <span class="k">cmpr</span>  <span class="r">idx</span>, <span class="r">r2</span>
+    <span class="k">jnz</span>   <span class="l">sum_loop</span></pre>
+
+<h4>Nested loops</h4>
+<p>
+    For nested loops (e.g., iterating over a 2D grid), use separate registers for each counter.
+    Save/restore the outer counter around the inner loop if needed:
+</p>
+<pre>
+<span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">0</span>        <span class="c">; outer counter (rows)</span>
+<span class="k">ldi</span>  <span class="r">r5</span>, <span class="n">128</span>
+<span class="l">outer:</span>
+    <span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">0</span>      <span class="c">; inner counter (cols)</span>
+    <span class="l">inner:</span>
+        <span class="c">; --- body: r1=row, r2=col ---</span>
+        <span class="k">inc</span>  <span class="r">r2</span>
+        <span class="k">cmpr</span> <span class="r">r2</span>, <span class="r">r5</span>
+        <span class="k">jnz</span>  <span class="l">inner</span>
+    <span class="k">inc</span>  <span class="r">r1</span>
+    <span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r5</span>
+    <span class="k">jnz</span>  <span class="l">outer</span></pre>
+
+<div class="warn-box">
+    <strong>Infinite loops</strong>
+    If your loop condition is never true, the program runs forever. Always double-check that your counter will
+    actually reach the termination value. Off-by-one errors are extremely common here — if your limit is 128,
+    make sure you're comparing after incrementing, not before.
+</div>
+</div>
+
+<!-- ── Chapter 9 ──────────────────────────────────────── -->
+<div id="tut-stack">
+<h3>Chapter 9 — The Stack & Functions</h3>
+<p class="chapter-intro">
+    The stack is the mechanism for subroutines, temporary variable storage, and preserving register state
+    across function calls. Understanding it is essential for writing any program longer than a few dozen lines.
+</p>
+
+<h4>What is the stack?</h4>
+<p>
+    The stack is a region of RAM that grows downward from a high address. <code>sp</code> (the stack pointer)
+    always points to the top of the stack. <code>push</code> decrements sp and writes to it. <code>pop</code>
+    reads from sp and increments it. It's LIFO — last in, first out.
+</p>
+<pre>
+<span class="c">; Before: sp = 0xBFFF</span>
+<span class="k">push</span> <span class="r">r1</span>   <span class="c">; sp = 0xBFFE, RAM[0xBFFE] = r1</span>
+<span class="k">push</span> <span class="r">r2</span>   <span class="c">; sp = 0xBFFD, RAM[0xBFFD] = r2</span>
+<span class="k">pop</span>  <span class="r">r3</span>   <span class="c">; r3 = RAM[0xBFFD] = r2, sp = 0xBFFE</span>
+<span class="k">pop</span>  <span class="r">r4</span>   <span class="c">; r4 = RAM[0xBFFE] = r1, sp = 0xBFFF</span></pre>
+
+<h4>Calling functions with call / ret</h4>
+<p>
+    <code>call addr</code> pushes the address of the next instruction onto the stack, then jumps to
+    <code>addr</code>. <code>ret</code> pops that address and jumps back. This is the call/return mechanism.
+</p>
+<pre>
+<span class="c">; Calling code:</span>
+    <span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">10</span>      <span class="c">; argument in r1</span>
+    <span class="k">call</span> <span class="l">double</span>       <span class="c">; call the function</span>
+    <span class="c">; r1 now contains 20</span>
+    <span class="k">halt</span>
+
+<span class="c">; Function definition:</span>
+<span class="l">double:</span>
+    <span class="k">add</span>  <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r1</span>  <span class="c">; r1 = r1 * 2</span>
+    <span class="k">ret</span></pre>
+
+<h4>Preserving registers in functions</h4>
+<p>
+    Functions often use registers that the caller also uses. To avoid clobbering, push registers you'll
+    modify at the start and pop them at the end:
+</p>
+<pre>
+<span class="l">my_func:</span>
+    <span class="k">push</span> <span class="r">r2</span>          <span class="c">; save r2 (we're about to overwrite it)</span>
+    <span class="k">push</span> <span class="r">r3</span>          <span class="c">; save r3</span>
+
+    <span class="c">; ... do work using r2 and r3 ...</span>
+
+    <span class="k">pop</span>  <span class="r">r3</span>          <span class="c">; restore in reverse order!</span>
+    <span class="k">pop</span>  <span class="r">r2</span>
+    <span class="k">ret</span></pre>
+
+<div class="warn-box">
+    <strong>Pop in reverse order</strong>
+    Pushes and pops must be symmetric and in reverse order. Pushing r2 then r3 means you must pop r3 then r2.
+    An unbalanced stack will cause <code>ret</code> to jump to garbage.
+</div>
+
+<h4>Calling convention</h4>
+<p>
+    YBM-16 has no enforced calling convention, but a consistent one keeps code manageable:
+</p>
+<ul>
+    <li><b>Arguments:</b> pass in r1, r2, r3, ... (left to right)</li>
+    <li><b>Return value:</b> leave in r1</li>
+    <li><b>Callee-saved:</b> if a function uses r5–r14, it must push/pop them</li>
+    <li><b>r0:</b> treat as permanently zero (never write to it)</li>
+</ul>
+</div>
+
+<!-- ── Chapter 10 ──────────────────────────────────────── -->
+<div id="tut-display">
+<h3>Chapter 10 — The Display</h3>
+<p class="chapter-intro">
+    The 128×128 pixel display is the most visible output of any YBM-16 program. Getting comfortable
+    with the pixel instruction and VRAM layout unlocks graphics programming.
+</p>
+
+<h4>The pixel instruction</h4>
+<p>
+    <code>pixel color_reg, addr_reg</code> writes one pixel of color to the VRAM address in <code>addr_reg</code>.
+    Both operands must be registers — there is no immediate form.
+</p>
+<pre>
+<span class="k">ldi</span>   <span class="r">r1</span>, <span class="n">0x000F</span>  <span class="c">; color index 15 (bright white in default palette)</span>
+<span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">0</span>      <span class="c">; VRAM address 0 = top-left pixel</span>
+<span class="k">pixel</span> <span class="r">r1</span>, <span class="r">idx</span></pre>
+
+<h4>VRAM layout</h4>
+<p>
+    VRAM is a flat array of pixel values starting at address 0x0000 within VRAM space (which is memory-mapped,
+    but the <code>pixel</code> instruction abstracts the mapping). Pixels are stored row by row:
+</p>
+<pre>
+pixel 0     = (x=0, y=0) top-left
+pixel 1     = (x=1, y=0)
+...
+pixel 127   = (x=127, y=0) end of row 0
+pixel 128   = (x=0,   y=1) start of row 1
+...
+pixel 16383 = (x=127, y=127) bottom-right</pre>
+
+<h4>Converting (x, y) to a pixel address</h4>
+<p>
+    <code>addr = y * 128 + x</code>. Since 128 = 2^7, the multiply can be done with a shift:
+</p>
+<pre>
+<span class="c">; Compute addr for (x=r1, y=r2), result in idx</span>
+<span class="k">ldi</span> <span class="r">r3</span>, <span class="n">7</span>
+<span class="k">shl</span> <span class="r">idx</span>, <span class="r">r2</span>, <span class="r">r3</span>   <span class="c">; idx = y * 128</span>
+<span class="k">add</span> <span class="r">idx</span>, <span class="r">idx</span>, <span class="r">r1</span>  <span class="c">; idx = y * 128 + x</span></pre>
+
+<h4>Filling the screen</h4>
+<p>Fill every pixel in a loop from address 0 to 16383:</p>
+<pre>
+<span class="k">ldi</span>   <span class="r">r1</span>, <span class="n">0x0005</span>  <span class="c">; color 5</span>
+<span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">0</span>
+<span class="k">ldi</span>   <span class="r">r2</span>, <span class="n">16384</span>
+<span class="l">fill:</span>
+    <span class="k">pixel</span> <span class="r">r1</span>, <span class="r">idx</span>
+    <span class="k">inc</span>   <span class="r">idx</span>
+    <span class="k">cmpr</span>  <span class="r">idx</span>, <span class="r">r2</span>
+    <span class="k">jnz</span>   <span class="l">fill</span>
+<span class="k">halt</span></pre>
+
+<h4>Drawing a rectangle</h4>
+<p>A nested loop over rows and columns:</p>
+<pre>
+<span class="c">; Draw a 20x10 filled rectangle at (x=10, y=5)</span>
+<span class="k">ldi</span>  <span class="r">r0</span>, <span class="n">0</span>
+<span class="k">ldi</span>  <span class="r">r8</span>, <span class="n">0x000A</span>  <span class="c">; color</span>
+<span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">5</span>       <span class="c">; row = 5</span>
+<span class="k">ldi</span>  <span class="r">r9</span>, <span class="n">15</span>      <span class="c">; row end = 5+10</span>
+<span class="l">row_loop:</span>
+    <span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">10</span>   <span class="c">; col = 10</span>
+    <span class="k">ldi</span>  <span class="r">r10</span>, <span class="n">30</span> <span class="c">; col end = 10+20</span>
+    <span class="l">col_loop:</span>
+        <span class="k">ldi</span>  <span class="r">r3</span>, <span class="n">7</span>
+        <span class="k">shl</span>  <span class="r">idx</span>, <span class="r">r1</span>, <span class="r">r3</span>
+        <span class="k">add</span>  <span class="r">idx</span>, <span class="r">idx</span>, <span class="r">r2</span>
+        <span class="k">pixel</span> <span class="r">r8</span>, <span class="r">idx</span>
+        <span class="k">inc</span>  <span class="r">r2</span>
+        <span class="k">cmpr</span> <span class="r">r2</span>, <span class="r">r10</span>
+        <span class="k">jnz</span>  <span class="l">col_loop</span>
+    <span class="k">inc</span>  <span class="r">r1</span>
+    <span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r9</span>
+    <span class="k">jnz</span>  <span class="l">row_loop</span>
+<span class="k">halt</span></pre>
+</div>
+
+<!-- ── Chapter 11 ──────────────────────────────────────── -->
+<div id="tut-projects">
+<h3>Chapter 11 — Projects</h3>
+<p class="chapter-intro">
+    Everything so far has been building toward this. Here are three complete, non-trivial programs that
+    exercise every part of the language. Read through each one carefully — after these, you have seen
+    every important pattern in YBM-16 assembly.
+</p>
+
+<h4>Project 1: Counting Sort</h4>
+<p>
+    Read 16 values from RAM, count how many are even, store the result.
+    Demonstrates: loops, modulo, conditionals, memory access.
+</p>
+<pre>
+<span class="c">; Assume 16 values are pre-loaded at 0x4000–0x400F</span>
+<span class="c">; Result (count of even numbers) stored to 0x4100</span>
+
+    <span class="k">ldi</span>  <span class="r">r0</span>, <span class="n">0</span>        <span class="c">; zero register</span>
+    <span class="k">ldi</span>  <span class="r">idx</span>, <span class="n">0x4000</span>  <span class="c">; pointer to data</span>
+    <span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">0x4010</span>  <span class="c">; end address</span>
+    <span class="k">ldi</span>  <span class="r">r3</span>, <span class="n">0</span>        <span class="c">; even counter</span>
+    <span class="k">ldi</span>  <span class="r">r5</span>, <span class="n">2</span>        <span class="c">; constant 2</span>
+
+<span class="l">check_loop:</span>
+    <span class="k">ldind</span> <span class="r">r1</span>, <span class="r">idx</span>     <span class="c">; load value</span>
+    <span class="k">mod</span>   <span class="r">r4</span>, <span class="r">r1</span>, <span class="r">r5</span>  <span class="c">; r4 = value % 2</span>
+    <span class="k">cmpr</span>  <span class="r">r4</span>, <span class="r">r0</span>      <span class="c">; is remainder 0?</span>
+    <span class="k">jnz</span>   <span class="l">not_even</span>
+    <span class="k">inc</span>   <span class="r">r3</span>           <span class="c">; it's even, count it</span>
+<span class="l">not_even:</span>
+    <span class="k">inc</span>   <span class="r">idx</span>
+    <span class="k">cmpr</span>  <span class="r">idx</span>, <span class="r">r2</span>
+    <span class="k">jnz</span>   <span class="l">check_loop</span>
+
+    <span class="k">st</span>    <span class="r">r3</span>, <span class="n">0x4100</span>  <span class="c">; store result</span>
+    <span class="k">halt</span></pre>
+
+<h4>Project 2: Gradient Screen</h4>
+<p>
+    Fill the screen with a horizontal gradient — each column a different color index from 0 to 15, tiling
+    across all 128 columns. Demonstrates: 2D loops, modulo for wrapping, pixel output.
+</p>
+<pre>
+    <span class="k">ldi</span>  <span class="r">r0</span>, <span class="n">0</span>
+    <span class="k">ldi</span>  <span class="r">r5</span>, <span class="n">16</span>       <span class="c">; palette size</span>
+    <span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">0</span>        <span class="c">; row</span>
+    <span class="k">ldi</span>  <span class="r">r6</span>, <span class="n">128</span>      <span class="c">; screen size</span>
+    <span class="k">ldi</span>  <span class="r">r7</span>, <span class="n">7</span>        <span class="c">; for shl</span>
+<span class="l">row_loop:</span>
+    <span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">0</span>        <span class="c">; col</span>
+<span class="l">col_loop:</span>
+    <span class="k">mod</span>  <span class="r">r3</span>, <span class="r">r2</span>, <span class="r">r5</span>  <span class="c">; color = col % 16</span>
+    <span class="k">shl</span>  <span class="r">idx</span>, <span class="r">r1</span>, <span class="r">r7</span>
+    <span class="k">add</span>  <span class="r">idx</span>, <span class="r">idx</span>, <span class="r">r2</span>
+    <span class="k">pixel</span> <span class="r">r3</span>, <span class="r">idx</span>
+    <span class="k">inc</span>  <span class="r">r2</span>
+    <span class="k">cmpr</span> <span class="r">r2</span>, <span class="r">r6</span>
+    <span class="k">jnz</span>  <span class="l">col_loop</span>
+    <span class="k">inc</span>  <span class="r">r1</span>
+    <span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r6</span>
+    <span class="k">jnz</span>  <span class="l">row_loop</span>
+    <span class="k">halt</span></pre>
+
+<h4>Project 3: Reusable draw_pixel Function</h4>
+<p>
+    A callable function that takes (x, y, color) as arguments and draws a pixel. This is the foundation
+    of any larger graphics program. Demonstrates: calling convention, call/ret, register preservation.
+</p>
+<pre>
+<span class="c">; Convention: r1=x, r2=y, r3=color</span>
+<span class="c">; draw_pixel does NOT modify r1, r2, r3</span>
+
+    <span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">64</span>       <span class="c">; x = 64</span>
+    <span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">32</span>       <span class="c">; y = 32</span>
+    <span class="k">ldi</span>  <span class="r">r3</span>, <span class="n">0x000F</span>  <span class="c">; color = white</span>
+    <span class="k">call</span> <span class="l">draw_pixel</span>
+    <span class="k">halt</span>
+
+<span class="l">draw_pixel:</span>
+    <span class="k">push</span> <span class="r">r4</span>           <span class="c">; save r4</span>
+    <span class="k">ldi</span>  <span class="r">r4</span>, <span class="n">7</span>
+    <span class="k">shl</span>  <span class="r">idx</span>, <span class="r">r2</span>, <span class="r">r4</span>  <span class="c">; idx = y * 128</span>
+    <span class="k">add</span>  <span class="r">idx</span>, <span class="r">idx</span>, <span class="r">r1</span> <span class="c">; idx += x</span>
+    <span class="k">pixel</span> <span class="r">r3</span>, <span class="r">idx</span>
+    <span class="k">pop</span>  <span class="r">r4</span>           <span class="c">; restore r4</span>
+    <span class="k">ret</span></pre>
+
+<div class="info-box">
+    <strong>You're ready</strong>
+    You've now seen every major programming pattern YBM-16 supports. From here, combine these building
+    blocks freely. Complex programs are just many small programs wired together with <code>call</code>,
+    loops, and shared memory.
+</div>
+</div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════ ISA REFERENCE ══ -->
+
+<section id="memory">
+    <h2>1. Memory & Data</h2>
+
+    <div class="ins-card" id="ld">
+        <div class="ins-head"><span class="ins-name">ld dst, addr</span> <span class="ins-hex">0x00</span></div>
+        <p>
+            Loads a 16-bit value from a fixed, literal memory address into register <b>dst</b>.
+            The address is embedded directly in the instruction bytes — it does not come from a register.
+            This is a direct memory read: the CPU computes nothing, it simply fetches the word at the given
+            address.
+        </p>
+        <p>
+            Use <code>ld</code> when you know the address at compile time (e.g., a named variable in RAM).
+            If the address is computed at runtime or lives in a register, use <code>ldind</code> instead.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x00</span><br>opcode</div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">dst</span><br>register</div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">addr[hi]</span><br>high byte</div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">addr[lo]</span><br>low byte</div>
+        </div>
+        <pre><span class="k">ld</span> <span class="r">r1</span>, <span class="n">0x5000</span> <span class="c">; r1 = RAM[0x5000]</span>
+<span class="k">ld</span> <span class="r">r2</span>, <span class="l">score</span>   <span class="c">; r2 = RAM[address of label "score"]</span></pre>
+    </div>
+
+    <div class="ins-card" id="st">
+        <div class="ins-head"><span class="ins-name">st src, addr</span> <span class="ins-hex">0x01</span></div>
+        <p>
+            Stores the 16-bit value of register <b>src</b> into a fixed memory address. The register is
+            unchanged. This is the mirror of <code>ld</code> — use it to persist a computed result back to RAM.
+        </p>
+        <p>
+            The address must be a literal or label. For runtime-computed addresses, use <code>stind</code>.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x01</span><br>opcode</div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">src</span><br>register</div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">addr[hi]</span><br>high byte</div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">addr[lo]</span><br>low byte</div>
+        </div>
+        <pre><span class="k">st</span> <span class="r">r1</span>, <span class="n">0x5000</span> <span class="c">; RAM[0x5000] = r1</span>
+<span class="k">st</span> <span class="r">r3</span>, <span class="l">result</span> <span class="c">; RAM[result] = r3</span></pre>
+    </div>
+
+    <div class="ins-card" id="ldi">
+        <div class="ins-head"><span class="ins-name">ldi dst, value</span> <span class="ins-hex">0x02</span></div>
+        <p>
+            Loads a literal 16-bit integer directly into <b>dst</b>. "Immediate" means the value is encoded
+            inside the instruction itself — no memory access occurs. This is the fastest way to put a known
+            constant into a register.
+        </p>
+        <p>
+            Values can be written in decimal, hex (<code>0x</code> prefix), or binary (<code>0b</code> prefix).
+            Labels also resolve to their address, so <code>ldi idx, my_label</code> loads the address of
+            a label into a register (useful for setting up pointers).
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x02</span><br>opcode</div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">dst</span><br>register</div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">val[hi]</span><br>high byte</div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">val[lo]</span><br>low byte</div>
+        </div>
+        <pre><span class="k">ldi</span> <span class="r">r1</span>, <span class="n">42</span>       <span class="c">; r1 = 42</span>
+<span class="k">ldi</span> <span class="r">r2</span>, <span class="n">0xFF00</span>   <span class="c">; r2 = 65280</span>
+<span class="k">ldi</span> <span class="r">idx</span>, <span class="l">data</span>    <span class="c">; idx = address of label "data"</span></pre>
+    </div>
+
+    <div class="ins-card" id="ldind">
+        <div class="ins-head"><span class="ins-name">ldind dst, src_reg</span> <span class="ins-hex">0x03</span></div>
+        <p>
+            Load indirect. Treats the value in <b>src_reg</b> as a 16-bit memory address and loads the
+            word at that address into <b>dst</b>. This is pointer dereferencing — the equivalent of
+            <code>*ptr</code> in C.
+        </p>
+        <p>
+            <code>ldind</code> is essential for arrays, linked data structures, and any time you compute
+            an address at runtime. Combine with <code>inc</code> to walk through an array one element at a time.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x03</span><br>opcode</div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">dst&lt;&lt;4 | src</span><br>packed regs</div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">0x00</span><br>unused</div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">0x00</span><br>unused</div>
+        </div>
+        <pre><span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">0x4000</span>  <span class="c">; idx = pointer to array start</span>
+<span class="k">ldind</span> <span class="r">r1</span>, <span class="r">idx</span>     <span class="c">; r1 = RAM[idx]</span>
+<span class="k">inc</span>   <span class="r">idx</span>          <span class="c">; advance pointer by 1 word</span>
+<span class="k">ldind</span> <span class="r">r2</span>, <span class="r">idx</span>     <span class="c">; r2 = RAM[idx+1]</span></pre>
+    </div>
+
+    <div class="ins-card" id="stind">
+        <div class="ins-head"><span class="ins-name">stind src, dst_reg</span> <span class="ins-hex">0x04</span></div>
+        <p>
+            Store indirect. Writes the value of <b>src</b> to the address currently held in <b>dst_reg</b>.
+            This is the write counterpart of <code>ldind</code> — used for filling arrays, writing to computed
+            VRAM addresses, and any store where the destination is not known at compile time.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x04</span><br>opcode</div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">src&lt;&lt;4 | dst</span><br>packed regs</div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">0x00</span><br>unused</div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">0x00</span><br>unused</div>
+        </div>
+        <pre><span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">0x4000</span>
+<span class="k">ldi</span>   <span class="r">r1</span>, <span class="n">999</span>
+<span class="k">stind</span> <span class="r">r1</span>, <span class="r">idx</span>     <span class="c">; RAM[idx] = 999</span>
+<span class="k">inc</span>   <span class="r">idx</span>
+<span class="k">stind</span> <span class="r">r1</span>, <span class="r">idx</span>     <span class="c">; RAM[idx+1] = 999</span></pre>
+    </div>
+
+    <div class="ins-card" id="mov">
+        <div class="ins-head"><span class="ins-name">mov dst, src</span> <span class="ins-hex">0x05</span></div>
+        <p>
+            Copies the value from register <b>src</b> into register <b>dst</b>. The source register is
+            unchanged. No memory access occurs — this is purely a register-to-register transfer.
+        </p>
+        <p>
+            Use <code>mov</code> to save a register's value before overwriting it, to pass values
+            between registers, or to duplicate a result.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x05</span><br>opcode</div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">dst&lt;&lt;4 | src</span><br>packed regs</div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">0x00</span><br>unused</div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">0x00</span><br>unused</div>
+        </div>
+        <pre><span class="k">mov</span> <span class="r">r5</span>, <span class="r">r0</span>  <span class="c">; r5 = r0 (r0 unchanged)</span>
+<span class="k">mov</span> <span class="r">r2</span>, <span class="r">idx</span> <span class="c">; save idx into r2 before clobbering idx</span></pre>
+    </div>
+</section>
+
+<section id="arithmetic">
+    <h2>2. Arithmetic & Logic</h2>
+
+    <div class="ins-card" id="add">
+        <div class="ins-head"><span class="ins-name">add dst, s1, s2</span> <span class="ins-hex">0x06</span></div>
+        <p>
+            Adds registers <b>s1</b> and <b>s2</b>, storing the 16-bit result in <b>dst</b>.
+            Overflow wraps silently (65535 + 1 = 0). All three registers may overlap: <code>add r1, r1, r1</code>
+            doubles r1.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x06</span></div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">dst&lt;&lt;4 | s1</span></div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">s2&lt;&lt;4</span></div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">0x00</span></div>
+        </div>
+        <pre><span class="k">add</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span> <span class="c">; r3 = r1 + r2</span>
+<span class="k">add</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r1</span> <span class="c">; r1 = r1 * 2 (double)</span></pre>
+    </div>
+
+    <div class="ins-card" id="sub">
+        <div class="ins-head"><span class="ins-name">sub dst, s1, s2</span> <span class="ins-hex">0x07</span></div>
+        <p>
+            Subtracts <b>s2</b> from <b>s1</b>, storing the result in <b>dst</b>. If s2 &gt; s1, the result
+            wraps (underflow). Use <code>cmpr</code> before subtracting if you need to guard against
+            underflow.
+        </p>
+        <pre><span class="k">sub</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span> <span class="c">; r3 = r1 - r2</span>
+<span class="k">sub</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r2</span> <span class="c">; r1 -= r2  (in-place)</span></pre>
+    </div>
+
+    <div class="ins-card" id="mul">
+        <div class="ins-head"><span class="ins-name">mul dst, s1, s2</span> <span class="ins-hex">0x08</span></div>
+        <p>
+            Multiplies <b>s1</b> by <b>s2</b>, keeping only the lower 16 bits of the result.
+            For large values the upper bits are silently discarded. If you need to multiply by a power of 2,
+            <code>shl</code> is faster.
+        </p>
+        <pre><span class="k">mul</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span> <span class="c">; r3 = r1 * r2 (low 16 bits)</span></pre>
+    </div>
+
+    <div class="ins-card" id="div">
+        <div class="ins-head"><span class="ins-name">div dst, s1, s2</span> <span class="ins-hex">0x09</span></div>
+        <p>
+            Integer division. Divides <b>s1</b> by <b>s2</b>, storing the quotient (floor) in <b>dst</b>.
+            The remainder is discarded; use <code>mod</code> to retrieve it. Dividing by zero is undefined
+            behaviour — always guard against it if s2 may be zero.
+        </p>
+        <pre><span class="k">div</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span> <span class="c">; r3 = floor(r1 / r2)</span></pre>
+    </div>
+
+    <div class="ins-card" id="mod">
+        <div class="ins-head"><span class="ins-name">mod dst, s1, s2</span> <span class="ins-hex">0x0D</span></div>
+        <p>
+            Computes <b>s1</b> modulo <b>s2</b>: the remainder after integer division.
+            Extremely useful for wrapping values (e.g., keeping a coordinate within screen bounds, cycling
+            through palette indices, or testing even/odd with mod 2).
+        </p>
+        <pre><span class="k">mod</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span>  <span class="c">; r3 = r1 % r2</span>
+
+<span class="c">; Keep x within 0–127:</span>
+<span class="k">ldi</span> <span class="r">r5</span>, <span class="n">128</span>
+<span class="k">mod</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r5</span>  <span class="c">; r1 = r1 % 128</span></pre>
+    </div>
+
+    <div class="ins-card" id="inc">
+        <div class="ins-head"><span class="ins-name">inc reg</span> <span class="ins-hex">0x0A</span></div>
+        <p>
+            Adds 1 to <b>reg</b> in place. Equivalent to <code>add reg, reg, one</code> but more compact.
+            Used constantly in loops and pointer arithmetic. Wraps from 65535 to 0.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x0A</span></div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">reg&lt;&lt;4</span></div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">0x00</span></div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">0x00</span></div>
+        </div>
+        <pre><span class="k">inc</span> <span class="r">r1</span>   <span class="c">; r1 = r1 + 1</span>
+<span class="k">inc</span> <span class="r">idx</span>  <span class="c">; advance pointer</span></pre>
+    </div>
+
+    <div class="ins-card" id="dec">
+        <div class="ins-head"><span class="ins-name">dec reg</span> <span class="ins-hex">0x0B</span></div>
+        <p>
+            Subtracts 1 from <b>reg</b> in place. The most common loop countdown instruction.
+            Wraps from 0 to 65535.
+        </p>
+        <pre><span class="k">dec</span> <span class="r">r1</span>   <span class="c">; r1 = r1 - 1</span></pre>
+    </div>
+
+    <div class="ins-card" id="neg">
+        <div class="ins-head"><span class="ins-name">neg reg</span> <span class="ins-hex">0x0C</span></div>
+        <p>
+            Two's complement negation. Computes <code>0 - reg</code> and stores the result back. In signed
+            16-bit arithmetic this flips the sign. Useful for computing differences (a - b = a + neg(b))
+            or for reversing direction in animation.
+        </p>
+        <pre><span class="k">ldi</span> <span class="r">r1</span>, <span class="n">5</span>
+<span class="k">neg</span> <span class="r">r1</span>       <span class="c">; r1 = 0xFFFB  (-5 in signed 16-bit)</span>
+<span class="k">ldi</span> <span class="r">r2</span>, <span class="n">5</span>
+<span class="k">add</span> <span class="r">r3</span>, <span class="r">r2</span>, <span class="r">r1</span> <span class="c">; r3 = 5 + (-5) = 0</span></pre>
+    </div>
+
+    <div class="ins-card" id="gand">
+        <div class="ins-head"><span class="ins-name">gand dst, s1, s2</span> <span class="ins-hex">0x0E</span></div>
+        <p>
+            Bitwise AND. Each bit of <b>dst</b> is 1 only if the corresponding bits of both <b>s1</b> and
+            <b>s2</b> are 1. Primary use: masking — isolating specific bits while zeroing everything else.
+        </p>
+        <pre><span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">0x00FF</span>
+<span class="k">gand</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span>  <span class="c">; r3 = low byte of r1 only</span></pre>
+    </div>
+
+    <div class="ins-card" id="gor">
+        <div class="ins-head"><span class="ins-name">gor dst, s1, s2</span> <span class="ins-hex">0x0F</span></div>
+        <p>
+            Bitwise OR. Each bit is 1 if either (or both) source bits are 1. Use to combine bit fields,
+            set specific bits, or merge two packed values.
+        </p>
+        <pre><span class="k">ldi</span> <span class="r">r2</span>, <span class="n">0x0001</span>
+<span class="k">gor</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r2</span>  <span class="c">; force bit 0 of r1 to 1</span></pre>
+    </div>
+
+    <div class="ins-card" id="gxor">
+        <div class="ins-head"><span class="ins-name">gxor dst, s1, s2</span> <span class="ins-hex">0x10</span></div>
+        <p>
+            Bitwise XOR. Each bit is 1 if the source bits differ. Key uses: toggling bits, zeroing a
+            register without ldi (<code>gxor r, r, r</code>), and simple "flip" logic in games.
+        </p>
+        <pre><span class="k">gxor</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r1</span>  <span class="c">; r1 = 0 (fastest way to zero a register)</span>
+
+<span class="c">; Toggle a boolean flag in bit 0:</span>
+<span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">1</span>
+<span class="k">gxor</span> <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r2</span></pre>
+    </div>
+
+    <div class="ins-card" id="gnot">
+        <div class="ins-head"><span class="ins-name">gnot reg</span> <span class="ins-hex">0x11</span></div>
+        <p>
+            Bitwise NOT. Inverts all 16 bits of <b>reg</b> in place. Every 0 becomes 1, every 1 becomes 0.
+            Equivalent to XOR with 0xFFFF.
+        </p>
+        <pre><span class="k">ldi</span>  <span class="r">r1</span>, <span class="n">0xFF00</span>
+<span class="k">gnot</span> <span class="r">r1</span>           <span class="c">; r1 = 0x00FF</span></pre>
+    </div>
+
+    <div class="ins-card" id="shl">
+        <div class="ins-head"><span class="ins-name">shl dst, src, count</span> <span class="ins-hex">0x12</span></div>
+        <p>
+            Shifts the bits of <b>src</b> left by the number of positions in <b>count</b>, filling the
+            vacated low bits with zeros, and stores the result in <b>dst</b>.
+            Shifting left by N multiplies by 2^N (modulo 65536).
+            Since <b>count</b> must be a register, load the shift amount with <code>ldi</code> first.
+        </p>
+        <pre><span class="k">ldi</span> <span class="r">r2</span>, <span class="n">3</span>
+<span class="k">shl</span> <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span>  <span class="c">; r3 = r1 * 8  (left shift 3)</span>
+
+<span class="c">; Fast y*128 for pixel address (128 = 2^7):</span>
+<span class="k">ldi</span> <span class="r">r4</span>, <span class="n">7</span>
+<span class="k">shl</span> <span class="r">idx</span>, <span class="r">r2</span>, <span class="r">r4</span>  <span class="c">; idx = y * 128</span></pre>
+    </div>
+
+    <div class="ins-card" id="shr">
+        <div class="ins-head"><span class="ins-name">shr dst, src, count</span> <span class="ins-hex">0x13</span></div>
+        <p>
+            Shifts the bits of <b>src</b> right by <b>count</b> positions, filling vacated high bits with
+            zeros (logical right shift). Divides by 2^N (integer, rounding down).
+            Used for extracting the high byte of a packed value, halving numbers, and scaling.
+        </p>
+        <pre><span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">8</span>
+<span class="k">shr</span>  <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span>  <span class="c">; r3 = high byte of r1 shifted into low position</span>
+
+<span class="c">; Halve a value:</span>
+<span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">1</span>
+<span class="k">shr</span>  <span class="r">r1</span>, <span class="r">r1</span>, <span class="r">r2</span>  <span class="c">; r1 = r1 / 2</span></pre>
+    </div>
+</section>
+
+<section id="control">
+    <h2>3. Control Flow</h2>
+
+    <div class="ins-card" id="cmpr">
+        <div class="ins-head"><span class="ins-name">cmpr r1, r2</span> <span class="ins-hex">0x14</span></div>
+        <p>
+            Compares <b>r1</b> to <b>r2</b> by performing the subtraction r1 - r2 internally, then setting
+            status flags based on the result. The registers are <b>not modified</b>. No result is stored.
+        </p>
+        <p>
+            The flags set are:
+        </p>
+        <ul>
+            <li><b>Z</b> — set if r1 == r2 (result is zero)</li>
+            <li><b>N</b> — set if r1 &lt; r2 in signed arithmetic (result is negative)</li>
+            <li><b>C</b> — set if r1 &lt; r2 in unsigned arithmetic (borrow occurred)</li>
+        </ul>
+        <p>
+            Always place <code>cmpr</code> directly before the conditional jump that tests its result.
+            Any arithmetic between cmpr and the jump may overwrite the flags.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x14</span></div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">r1&lt;&lt;4 | r2</span></div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">0x00</span></div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">0x00</span></div>
+        </div>
+        <pre><span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>
+<span class="k">jz</span>   <span class="l">equal</span>    <span class="c">; r1 == r2</span>
+<span class="k">jn</span>   <span class="l">less</span>     <span class="c">; r1 &lt; r2</span>
+<span class="k">jge</span>  <span class="l">big</span>      <span class="c">; r1 >= r2</span></pre>
+    </div>
+
+    <div class="ins-card" id="jmp">
+        <div class="ins-head"><span class="ins-name">jmp addr</span> <span class="ins-hex">0x15</span></div>
+        <p>
+            Unconditional jump. Sets the program counter to <b>addr</b> immediately. Execution continues
+            from there. No flags are tested. Use for infinite loops, skipping over else blocks, and
+            end-of-function cleanup paths.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x15</span></div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">0x00</span></div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">addr[hi]</span></div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">addr[lo]</span></div>
+        </div>
+        <pre><span class="k">jmp</span> <span class="l">loop_start</span>
+<span class="k">jmp</span> <span class="n">0x0000</span>      <span class="c">; jump to program start (restart)</span></pre>
+    </div>
+
+    <div class="ins-card" id="jz">
+        <div class="ins-head"><span class="ins-name">jz addr</span> <span class="ins-hex">0x16</span></div>
+        <p>
+            Jump if Zero. Takes the branch if the Z flag is set — meaning the last <code>cmpr</code> found
+            the two operands equal. Falls through to the next instruction otherwise.
+        </p>
+        <pre><span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r0</span>  <span class="c">; is r1 == 0?</span>
+<span class="k">jz</span>   <span class="l">is_zero</span></pre>
+    </div>
+
+    <div class="ins-card" id="jnz">
+        <div class="ins-head"><span class="ins-name">jnz addr</span> <span class="ins-hex">0x17</span></div>
+        <p>
+            Jump if Not Zero. Takes the branch if the Z flag is <b>clear</b> — the last comparison was
+            not equal. This is the most common loop-continuation check.
+        </p>
+        <pre><span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>
+<span class="k">jnz</span>  <span class="l">not_equal</span>
+
+<span class="c">; Loop pattern:</span>
+<span class="k">dec</span>  <span class="r">r1</span>
+<span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r0</span>
+<span class="k">jnz</span>  <span class="l">loop</span>      <span class="c">; keep going while r1 != 0</span></pre>
+    </div>
+
+    <div class="ins-card" id="jn">
+        <div class="ins-head"><span class="ins-name">jn addr</span> <span class="ins-hex">0x18</span></div>
+        <p>
+            Jump if Negative. Takes the branch if the N flag is set — meaning <code>cmpr s1, s2</code>
+            found s1 &lt; s2 in signed arithmetic. Use for signed comparisons and bouncing animation direction.
+        </p>
+        <pre><span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>
+<span class="k">jn</span>   <span class="l">r1_less</span>   <span class="c">; r1 < r2</span></pre>
+    </div>
+
+    <div class="ins-card" id="jc">
+        <div class="ins-head"><span class="ins-name">jc addr</span> <span class="ins-hex">0x19</span></div>
+        <p>
+            Jump if Carry. The carry flag is set when an unsigned subtraction borrows, i.e., when s1 &lt; s2
+            treating both as unsigned 16-bit values. Use for unsigned less-than comparisons and detecting
+            arithmetic wraparound.
+        </p>
+        <pre><span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>
+<span class="k">jc</span>   <span class="l">unsigned_less</span>  <span class="c">; r1 < r2 (unsigned)</span></pre>
+    </div>
+
+    <div class="ins-card" id="jge">
+        <div class="ins-head"><span class="ins-name">jge addr</span> <span class="ins-hex">0x1a</span></div>
+        <p>
+            Jump if Greater or Equal. Branches when N is clear, meaning s1 &gt;= s2. Complement of
+            <code>jn</code>. Use for "keep going while index is within bounds" or "skip if already at max".
+        </p>
+        <pre><span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>
+<span class="k">jge</span>  <span class="l">at_or_above</span>  <span class="c">; r1 >= r2</span></pre>
+    </div>
+
+    <div class="ins-card" id="jle">
+        <div class="ins-head"><span class="ins-name">jle addr</span> <span class="ins-hex">0x1b</span></div>
+        <p>
+            Jump if Less or Equal. Branches when either N or Z is set, meaning s1 &lt;= s2.
+        </p>
+        <pre><span class="k">cmpr</span> <span class="r">r1</span>, <span class="r">r2</span>
+<span class="k">jle</span>  <span class="l">at_or_below</span>  <span class="c">; r1 <= r2</span></pre>
+    </div>
+</section>
+
+<section id="stack">
+    <h2>4. Stack & System</h2>
+
+    <div class="ins-card" id="push">
+        <div class="ins-head"><span class="ins-name">push reg</span> <span class="ins-hex">0x1c</span></div>
+        <p>
+            Decrements the stack pointer (<code>sp</code>) by 1, then writes the value of <b>reg</b> to
+            the address now pointed to by sp. The register is unchanged.
+        </p>
+        <p>
+            Use push to save register state before calling a function, or to temporarily store a value when
+            you're out of registers.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x1C</span></div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">reg&lt;&lt;4</span></div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">0x00</span></div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">0x00</span></div>
+        </div>
+        <pre><span class="k">push</span> <span class="r">r1</span>   <span class="c">; sp--, RAM[sp] = r1</span>
+<span class="k">push</span> <span class="r">r2</span>   <span class="c">; sp--, RAM[sp] = r2</span></pre>
+    </div>
+
+    <div class="ins-card" id="pop">
+        <div class="ins-head"><span class="ins-name">pop reg</span> <span class="ins-hex">0x1d</span></div>
+        <p>
+            Reads the value at the address pointed to by <code>sp</code> into <b>reg</b>, then increments sp.
+            This is the inverse of push. Always pop in the reverse order you pushed.
+        </p>
+        <pre><span class="k">pop</span> <span class="r">r2</span>   <span class="c">; r2 = RAM[sp], sp++  ← pops last thing pushed</span>
+<span class="k">pop</span> <span class="r">r1</span>   <span class="c">; r1 = RAM[sp], sp++</span></pre>
+    </div>
+
+    <div class="ins-card" id="call">
+        <div class="ins-head"><span class="ins-name">call addr</span> <span class="ins-hex">0x1e</span></div>
+        <p>
+            Pushes the address of the instruction immediately following this <code>call</code> onto the stack
+            (the return address), then jumps to <b>addr</b>. The called function uses <code>ret</code> to
+            jump back.
+        </p>
+        <p>
+            This is the fundamental subroutine mechanism. Functions can call other functions (nested calls)
+            as long as the stack has room — each call uses one stack slot for the return address.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x1E</span></div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">0x00</span></div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">addr[hi]</span></div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">addr[lo]</span></div>
+        </div>
+        <pre><span class="k">call</span> <span class="l">my_function</span>    <span class="c">; push return addr, jump to my_function</span>
+<span class="c">; execution resumes here after ret</span></pre>
+    </div>
+
+    <div class="ins-card" id="ret">
+        <div class="ins-head"><span class="ins-name">ret</span> <span class="ins-hex">0x1f</span></div>
+        <p>
+            Pops the top value from the stack and jumps to it. This is how a subroutine returns to its
+            caller. The popped value must be the return address placed there by <code>call</code> — if the
+            stack is unbalanced (mismatched pushes/pops inside the function), ret will jump to garbage.
+        </p>
+        <pre><span class="l">my_function:</span>
+    <span class="k">push</span> <span class="r">r2</span>       <span class="c">; save r2</span>
+    <span class="c">; ... do work ...</span>
+    <span class="k">pop</span>  <span class="r">r2</span>       <span class="c">; restore r2</span>
+    <span class="k">ret</span>            <span class="c">; jump back to caller</span></pre>
+    </div>
+
+    <div class="ins-card" id="pixel">
+        <div class="ins-head"><span class="ins-name">pixel color_reg, pos_reg</span> <span class="ins-hex">0x20</span></div>
+        <p>
+            Writes a single pixel to the display. <b>color_reg</b> holds a color index from the 16-color
+            indexed palette (values 0–15; higher bits are ignored). <b>pos_reg</b> holds the linear pixel
+            address: 0 is top-left, 127 is end of the first row, 128 is start of the second row, and
+            16383 is the bottom-right pixel.
+        </p>
+        <p>
+            Both operands must be registers. Compute the pixel address from (x, y) with:
+            <code>addr = y * 128 + x</code>, where the multiply can be replaced by <code>shl y, y, 7</code>
+            since 128 = 2^7.
+        </p>
+        <div class="encoding-box">
+            <div class="enc-byte"><span class="label">byte 0</span><span class="val">0x20</span></div>
+            <div class="enc-byte"><span class="label">byte 1</span><span class="val">color&lt;&lt;4 | pos</span></div>
+            <div class="enc-byte"><span class="label">byte 2</span><span class="val">0x00</span></div>
+            <div class="enc-byte"><span class="label">byte 3</span><span class="val">0x00</span></div>
+        </div>
+        <pre><span class="k">ldi</span>   <span class="r">r1</span>, <span class="n">0x000A</span>  <span class="c">; color 10</span>
+<span class="k">ldi</span>   <span class="r">r2</span>, <span class="n">64</span>      <span class="c">; x = 64</span>
+<span class="k">ldi</span>   <span class="r">r3</span>, <span class="n">32</span>      <span class="c">; y = 32</span>
+<span class="k">ldi</span>   <span class="r">r4</span>, <span class="n">7</span>
+<span class="k">shl</span>   <span class="r">idx</span>, <span class="r">r3</span>, <span class="r">r4</span> <span class="c">; idx = y * 128</span>
+<span class="k">add</span>   <span class="r">idx</span>, <span class="r">idx</span>, <span class="r">r2</span><span class="c">; idx += x</span>
+<span class="k">pixel</span> <span class="r">r1</span>, <span class="r">idx</span></pre>
+    </div>
+
+    <div class="ins-card" id="nop">
+        <div class="ins-head"><span class="ins-name">nop</span> <span class="ins-hex">0x21</span></div>
+        <p>
+            No operation. The CPU fetches and decodes this instruction but does nothing. Useful for:
+            timing delays (burn a precise number of cycles), placeholder slots during development, and
+            padding code regions to align addresses.
+        </p>
+        <pre><span class="k">nop</span>  <span class="c">; one cycle of nothing</span>
+<span class="k">nop</span>
+<span class="k">nop</span>  <span class="c">; small busy-wait</span></pre>
+    </div>
+
+    <div class="ins-card" id="halt">
+        <div class="ins-head"><span class="ins-name">halt</span> <span class="ins-hex">0x22</span></div>
+        <p>
+            Stops the CPU. Execution ends. Register and memory state are preserved for inspection.
+            Every program should end with <code>halt</code> — without it, the CPU will continue fetching
+            whatever bytes come after your code, which is undefined behaviour.
+        </p>
+        <pre><span class="k">halt</span>  <span class="c">; program ends here</span></pre>
+    </div>
+</section>
+
+<section id="masterclass">
+    <h2>Assembly Masterclass</h2>
+
+    <h3>Program A: Logic & Conditionals</h3>
+    <p>Checks if a value in memory is even or odd.</p>
+    <pre>
+    <span class="k">ld</span>   <span class="r">r1</span>, <span class="n">0x1000</span>   <span class="c">; Load number from 0x1000</span>
+    <span class="k">ldi</span>  <span class="r">r2</span>, <span class="n">2</span>
+    <span class="k">mod</span>  <span class="r">r3</span>, <span class="r">r1</span>, <span class="r">r2</span>   <span class="c">; r3 = r1 % 2</span>
+    <span class="k">cmpr</span> <span class="r">r3</span>, <span class="r">r0</span>       <span class="c">; Compare remainder to zero (r0 is usually 0)</span>
+    <span class="k">jz</span>   <span class="l">is_even</span>
+    <span class="k">ldi</span>  <span class="r">r4</span>, <span class="n">1</span>        <span class="c">; Store 1 for Odd</span>
+    <span class="k">st</span>   <span class="r">r4</span>, <span class="n">0x1001</span>
+    <span class="k">halt</span>
+<span class="l">is_even:</span>
+    <span class="k">ldi</span>  <span class="r">r4</span>, <span class="n">2</span>        <span class="c">; Store 2 for Even</span>
+    <span class="k">st</span>   <span class="r">r4</span>, <span class="n">0x1001</span>
+    <span class="k">halt</span></pre>
+
+    <h3>Program B: Full Screen Scanline</h3>
+    <p>Draws a green horizontal line across the screen.</p>
+    <pre>
+    <span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">0</span>       <span class="c">; Screen buffer start</span>
+    <span class="k">ldi</span>   <span class="r">r1</span>, <span class="n">0x0F00</span>  <span class="c">; Green color code</span>
+    <span class="k">ldi</span>   <span class="r">r2</span>, <span class="n">640</span>     <span class="c">; Width of screen</span>
+
+<span class="l">draw_line:</span>
+    <span class="k">pixel</span> <span class="r">r1</span>, <span class="r">idx</span>     <span class="c">; Render</span>
+    <span class="k">inc</span>   <span class="r">idx</span>
+    <span class="k">cmpr</span>  <span class="r">idx</span>, <span class="r">r2</span>
+    <span class="k">jnz</span>   <span class="l">draw_line</span>
+    <span class="k">halt</span></pre>
+
+    <h3>Program C: Function Pointers & Stack</h3>
+    <p>Using <code>call</code> and <code>ret</code> to draw a square pattern.</p>
+    <pre>
+    <span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">100</span>     <span class="c">; Start position</span>
+    <span class="k">ldi</span>   <span class="r">r1</span>, <span class="n">0xFFFF</span>  <span class="c">; White pixel</span>
+    <span class="k">call</span>  <span class="l">draw_dot</span>
+    <span class="k">ldi</span>   <span class="r">idx</span>, <span class="n">110</span>
+    <span class="k">call</span>  <span class="l">draw_dot</span>
+    <span class="k">halt</span>
+
+<span class="l">draw_dot:</span>
+    <span class="k">pixel</span> <span class="r">r1</span>, <span class="r">idx</span>
+    <span class="k">ret</span>               <span class="c">; Jump back to call site</span></pre>
+</section>
+
+</main>
+</body>
+</html>
