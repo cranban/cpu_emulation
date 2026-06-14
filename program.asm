@@ -1,60 +1,378 @@
-ldi 0
-mov 267
-loop:
-stiv 0
-stiv 3
-stiv 64
-stiv 67
-stiv 128
-stiv 129
-stiv 130
-stiv 131
-stiv 192
-stiv 195
-stiv 256
-stiv 259
-stiv 5
-stiv 6
-stiv 7
-stiv 8
-stiv 69
-stiv 133
-stiv 134
-stiv 135
-stiv 197
-stiv 261
-stiv 262
-stiv 263
-stiv 264
-stiv 266
-stiv 267
-stiv 268
-stiv 269
-stiv 202
-stiv 138
-stiv 74
-stiv 10
-stiv 15
-stiv 79
-stiv 143
-stiv 207
-stiv 271
-stiv 272
-stiv 273
-stiv 274
-stiv 276
-stiv 277
-stiv 278
-stiv 279
-stiv 212
-stiv 215
-stiv 84
-stiv 87
-stiv 20
-stiv 21
-stiv 22
-stiv 23
-stiv 151
-stiv 148
-inc 1
-jmp loop
+; compiled by viper / ybmc
+__L1:
+    ldi r1 1
+    ldi r2 0
+    cmpr r1 r2
+    jz __L2
+    ldi r1 20
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L3
+    ldi r1 190
+    st r1 0xFEF0
+__L3:
+    ldi r1 26
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L5
+    ldi r1 232
+    st r1 0xFEF0
+__L5:
+    ldi r1 8
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L7
+    ldi r1 244
+    st r1 0xFEF0
+__L7:
+    ldi r1 21
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L9
+    ldi r1 256
+    st r1 0xFEF0
+__L9:
+    ldi r1 23
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L11
+    ldi r1 268
+    st r1 0xFEF0
+__L11:
+    ldi r1 28
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L13
+    ldi r1 280
+    st r1 0xFEF0
+__L13:
+    ldi r1 24
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L15
+    ldi r1 292
+    st r1 0xFEF0
+__L15:
+    ldi r1 12
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L17
+    ldi r1 304
+    st r1 0xFEF0
+__L17:
+    ldi r1 18
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L19
+    ldi r1 316
+    st r1 0xFEF0
+__L19:
+    ldi r1 19
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L21
+    ldi r1 328
+    st r1 0xFEF0
+__L21:
+    ldi r1 4
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L23
+    ldi r1 340
+    st r1 0xFEF0
+__L23:
+    ldi r1 22
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L25
+    ldi r1 352
+    st r1 0xFEF0
+__L25:
+    ldi r1 7
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L27
+    ldi r1 364
+    st r1 0xFEF0
+__L27:
+    ldi r1 9
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L29
+    ldi r1 376
+    st r1 0xFEF0
+__L29:
+    ldi r1 10
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L31
+    ldi r1 388
+    st r1 0xFEF0
+__L31:
+    ldi r1 11
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L33
+    ldi r1 400
+    st r1 0xFEF0
+__L33:
+    ldi r1 13
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L35
+    ldi r1 412
+    st r1 0xFEF0
+__L35:
+    ldi r1 14
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L37
+    ldi r1 424
+    st r1 0xFEF0
+__L37:
+    ldi r1 15
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 0
+    cmpr r1 r2
+    jz __L39
+    ldi r1 436
+    st r1 0xFEF0
+__L39:
+    ldi r1 20
+    ldi r2 0xFF00
+    add r1 r1 r2
+    ldind r1 r1
+    ldi r2 0x00FF
+    gand r1 r1 r2
+    ldi r2 26
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 8
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 21
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 23
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 28
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 24
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 12
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 18
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 19
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 4
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 22
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 7
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 9
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 10
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 11
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 13
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 14
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    ldi r2 15
+    ldi r3 0xFF00
+    add r2 r2 r3
+    ldind r2 r2
+    ldi r3 0x00FF
+    gand r2 r2 r3
+    add r1 r1 r2
+    st r1 0x8000
+    ld r1 0x8000
+    ldi r2 0
+    cmpr r1 r2
+    jnz __L41
+    ldi r1 0
+    st r1 0xFEF0
+__L41:
+    vsync
+    jmp __L1
+__L2:
+    halt
